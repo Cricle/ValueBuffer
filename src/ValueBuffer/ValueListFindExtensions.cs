@@ -13,6 +13,11 @@ namespace ValueBuffer
         }
         public static void ToList<T>(this in ValueList<T> list, List<T> lst)
         {
+            if (lst is null)
+            {
+                throw new ArgumentNullException(nameof(lst));
+            }
+
             var enu = list.GetSlotEnumerator();
             while (enu.MoveNext())
             {
@@ -36,6 +41,11 @@ namespace ValueBuffer
         public static int FindIndex<T>(this in ValueList<T> list, Predicate<T> condition)
            where T : IEquatable<T>
         {
+            if (condition is null)
+            {
+                throw new ArgumentNullException(nameof(condition));
+            }
+
             var totalPos = 0;
             var enu = list.GetEnumerator();
             while (enu.MoveNext())

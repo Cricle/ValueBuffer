@@ -13,7 +13,7 @@ namespace ValueBuffer
     /// See like https://source.dot.net/#System.Text.RegularExpressions/ValueListBuilder.cs,8d0a83e8be16c39f
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public partial struct ValueList<T>
+    public partial struct ValueList<T> : IDisposable
     {
         private static readonly ArrayPool<T> pool = ArrayPool<T>.Shared;
         private static readonly ArrayPool<T[]> poolTs = ArrayPool<T[]>.Shared;
@@ -354,6 +354,7 @@ namespace ValueBuffer
             }
             this = default;
         }
+
     }
 
 }

@@ -12,6 +12,12 @@ namespace ValueBuffer.Test
     public class ValueListFindExtensionsTest
     {
         [TestMethod]
+        public void GivenNullCall_MustThrowException()
+        {
+            Assert.ThrowsException<ArgumentNullException>(() => ValueListFindExtensions.FindIndex<int>(default, (Predicate<int>)null));
+            Assert.ThrowsException<ArgumentNullException>(() => ValueListFindExtensions.ToList<object>(default, (List<object>)null));
+        }
+        [TestMethod]
         public void ToList()
         {
             var list = new ValueList<int>(1);
