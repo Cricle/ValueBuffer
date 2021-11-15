@@ -91,6 +91,95 @@ namespace ValueBuffer.Test
             }
             list.Dispose();
         }
+        class Index
+        {
+            public int A { get; set; }
+        }
+        [TestMethod]
+        public void AddOne()
+        {
+            var list = new ValueList<Index>(32768);
+            var obj = new Index { A = 123 };
+            list.Add(obj);
+            var arr = list.ToArray();
+            Assert.AreEqual(1, arr.Length);
+            Assert.AreEqual(obj, arr[0]);
+            list.Dispose();
+        }
+        [TestMethod]
+        public void GivenNullToArray_ThrowException()
+        {
+            var list = new ValueList<Index>(1);
+            Assert.ThrowsException<ArgumentNullException>(() => list.ToArray(null));
+            list.Dispose();
+        }
+        [TestMethod]
+        public void ToArrayOutOfRange()
+        {
+            var list = new ValueList<Index>(1);
+            for (int i = 0; i < 100; i++)
+            {
+                list.Add(new Index { A = i });
+            }
+            var lst = new Index[10];
+            Assert.ThrowsException<ArgumentException>(() => list.ToArray(lst));
+            list.Dispose();
+        }
+        [TestMethod]
+        public void AddOutOfFirstBlock_ToArray()
+        {
+            var list = new ValueList<Index>(1);
+            for (int i = 0; i < 400000; i++)
+            {
+                list.Add(new Index { A = i });
+            }
+            var arr = list.ToArray();
+            Assert.AreEqual(400000, arr.Length);
+            for (int i = 0; i < 400000; i++)
+            {
+                Assert.AreEqual(list[i], arr[i],"The "+i);
+            }
+            list.Dispose();
+        }
+        [TestMethod]
+        [DataRow(0, 100)]
+        [DataRow(100, 100)]
+        [DataRow(100, 1000)]
+        [DataRow(999, 1000)]
+        [DataRow(50, 10)]
+        public void AddWhenGetObject(int cap, int count)
+        {
+            var list = new ValueList<Index>(cap);
+            for (int i = 0; i < count; i++)
+            {
+                list.Add(new Index { A=i});
+            }
+            Assert.AreEqual(count, list.Size);
+            var enu = list.GetEnumerator();
+            var x = 0;
+            while (enu.MoveNext())
+            {
+                var a = list[x];
+                var b = enu.Current;
+                Assert.AreEqual(a,b);
+                x++;
+            }
+            var enuSlot = list.GetSlotEnumerator();
+            x = 0;
+            while (enuSlot.MoveNext())
+            {
+                for (int j = 0; j < enuSlot.Current.Length; j++)
+                {
+                    Assert.AreEqual(list[x++], enuSlot.Current[j]);
+                }
+                var arr = enuSlot.CurrentArray;
+                for (int j = 0; j < enuSlot.Current.Length; j++)
+                {
+                    Assert.AreEqual(enuSlot.Current[j], arr[j]);
+                }
+            }
+            list.Dispose();
+        }
         [TestMethod]
         public void Remove()
         {

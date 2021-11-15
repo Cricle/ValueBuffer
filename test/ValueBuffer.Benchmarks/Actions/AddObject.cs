@@ -1,5 +1,6 @@
 ﻿using BenchmarkDotNet.Attributes;
 using System.Collections.Generic;
+using System.Text;
 
 namespace ValueBuffer.Benchmarks.Actions
 {
@@ -40,6 +41,47 @@ namespace ValueBuffer.Benchmarks.Actions
                     _ = enu.Current;
                 }
                 list.Dispose();
+            }
+        }
+    }
+    [MemoryDiagnoser]
+    [MemoryRandomization]
+    public class StringBuilderObject
+    {
+        [Params(45, 1234, 876542)]
+        public int Count { get; set; }
+
+        [Benchmark(Baseline = true)]
+        public void StringBuilder()
+        {
+            var list = new StringBuilder();
+            for (int i = 0; i < Count; i++)
+            {
+                list.Append("hello world!!!");
+            }
+            list.ToString();
+        }
+        [Benchmark]
+        public void ValueStringBuilder()
+        {
+            var list = new ValueStringBuilder();
+            for (int i = 0; i < Count; i++)
+            {
+                list.Append("hello world!!!");
+            }
+            list.ToString();
+            list.Dispose();
+        }
+        [Benchmark]
+        public void ValueZString()
+        {
+            using (var list = Cysharp.Text.ZString.CreateUtf8StringBuilder())
+            {
+                for (int i = 0; i < Count; i++)
+                {
+                    list.Append("hello world!!!");
+                }
+                list.ToString();
             }
         }
     }

@@ -292,7 +292,7 @@ namespace ValueBuffer
             }
             if (bufferSlotIndex != 0)
             {
-                Array.Copy(buffer, point, localBuffer, 0, localUsed);
+                Array.Copy(localBuffer, 0, buffer, point, localUsed);
             }
         }
 
@@ -320,7 +320,7 @@ namespace ValueBuffer
 
             if (size == 0)
             {
-                allocSize = Math.Max(4U, (uint)min);
+                allocSize = Math.Max(32768U, (uint)min);
                 if (bufferSlotIndex == 0)
                 {
                     allocSize = Math.Max((uint)baseCapacity, allocSize);
