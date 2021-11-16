@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System;
 using System.Buffers;
 using System.Diagnostics;
 using System.IO;
@@ -7,6 +10,9 @@ using System.Text;
 
 namespace ValueBuffer
 {
+    /// <summary>
+    /// https://source.dot.net/#System.Text.RegularExpressions/ValueStringBuilder.cs,157e1a7ce4de87da
+    /// </summary>
     public ref partial struct ValueStringBuilder
     {
         public void AppendFormat(string format, object arg0) => AppendFormatHelper(null, format, new ParamsArray(arg0));
@@ -402,7 +408,7 @@ namespace ValueBuffer
             try
             {
                 ToString(buffer);
-                return new string(buffer);
+                return new string(buffer,0, _chars.Size);
             }
             finally
             {

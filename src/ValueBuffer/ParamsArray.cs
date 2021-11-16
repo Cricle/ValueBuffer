@@ -51,11 +51,11 @@ namespace ValueBuffer
 
         public ParamsArray(object[] args)
         {
+            _args = args ?? throw new System.ArgumentNullException(nameof(args));
             int len = args.Length;
             _arg0 = len > 0 ? args[0] : null;
             _arg1 = len > 1 ? args[1] : null;
             _arg2 = len > 2 ? args[2] : null;
-            _args = args;
         }
 
         public int Length => _args.Length;

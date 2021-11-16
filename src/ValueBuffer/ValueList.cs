@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System;
 using System.Buffers;
 using System.Collections;
 using System.Collections.Generic;
@@ -253,11 +256,8 @@ namespace ValueBuffer
                     Grow(items.Length);
                 }
             }
-            if (itemUsed != items.Length - 1)
-            {
-                items.Slice(itemUsed)
-                    .CopyTo(localBuffer.AsSpan(localUsed));
-            }
+            items.Slice(itemUsed)
+                .CopyTo(localBuffer.AsSpan(localUsed));
             localUsed += items.Length - itemUsed;
             size += items.Length;
         }
