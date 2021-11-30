@@ -353,5 +353,23 @@ namespace ValueBuffer.Test
                 x++;
             }
         }
+        [TestMethod]
+        public void EnumerableOutOfSlot()
+        {
+            using (var lst = new ValueList<int>())
+            {
+                var count = 7876543;
+                for (int i = 0; i < count; i++)
+                {
+                    lst.Add(i);
+                }
+                var slot = lst.GetEnumerator();
+                var j = 0;
+                while (slot.MoveNext())
+                {
+                    Assert.AreEqual(j++, slot.Current, j.ToString());
+                }
+            }
+        }
     }
 }

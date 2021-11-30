@@ -98,5 +98,24 @@ namespace ValueBuffer.Test
             Assert.AreEqual("123.456789", b.ToString());
             b.Dispose();
         }
+        [TestMethod]
+        public void GivenNullAppend_MustThrowExceotion()
+        {
+            var b = new ValueStringBuilder(1024);
+            ArgumentNullException ex = null;
+            try
+            {
+                b.AppendFormat("", (object[])null);
+            }
+            catch(ArgumentNullException e)
+            {
+                ex = e;
+            }
+            finally
+            {
+                b.Dispose();
+            }
+            Assert.IsNotNull(ex);
+        }
     }
 }
