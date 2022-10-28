@@ -1,8 +1,11 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace ValueBuffer.Test
@@ -368,6 +371,60 @@ namespace ValueBuffer.Test
                 while (slot.MoveNext())
                 {
                     Assert.AreEqual(j++, slot.Current, j.ToString());
+                }
+            }
+        }
+        [TestMethod]
+        public void EnumerableByObject()
+        {
+            using (var lst = new ValueList<int>())
+            {
+                var count = 7876543;
+                for (int i = 0; i < count; i++)
+                {
+                    lst.Add(i);
+                }
+                var slot = ((IEnumerable<int>)lst).GetEnumerator();
+                var j = 0;
+                while (slot.MoveNext())
+                {
+                    Assert.AreEqual(j++, slot.Current, j.ToString());
+                }
+            }
+        }
+        [TestMethod]
+        public void NesJsonSerializer()
+        {
+            using (var lst = new ValueList<int>())
+            {
+                var count = 50;
+                for (int i = 0; i < count; i++)
+                {
+                    lst.Add(i);
+                }
+                var str = JsonConvert.SerializeObject(lst);
+                var back = JsonConvert.DeserializeObject<List<int>>(str);
+                for (int i = 0; i < count; i++)
+                {
+                    Assert.AreEqual(i, back[i],i.ToString());
+                }
+            }
+        }
+        [TestMethod]
+        public void TextJsonSerializer()
+        {
+            using (var lst = new ValueList<int>())
+            {
+                var count = 50;
+                for (int i = 0; i < count; i++)
+                {
+                    lst.Add(i);
+                }
+                var str = System.Text.Json.JsonSerializer.Serialize(lst);
+                var back = System.Text.Json.JsonSerializer.Deserialize<List<int>>(str);
+                for (int i = 0; i < count; i++)
+                {
+                    Assert.AreEqual(i, back[i], i.ToString());
                 }
             }
         }

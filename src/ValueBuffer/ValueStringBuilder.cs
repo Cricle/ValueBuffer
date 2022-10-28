@@ -53,20 +53,6 @@ namespace ValueBuffer
             AppendFormatHelper(provider, format, new ParamsArray(args));
         }
 
-#if NET6_0_OR_GREATER
-
-        internal void AppendSpanFormattable<T>(T value, string? format, IFormatProvider provider) where T : ISpanFormattable
-        {
-            if (value.TryFormat(_chars.Slice(_pos), out int charsWritten, format, provider))
-            {
-                _pos += charsWritten;
-            }
-            else
-            {
-                Append(value.ToString(format, provider));
-            }
-        }
-#endif
 
         // Copied from StringBuilder, can't be done via generic extension
         // as ValueStringBuilder is a ref struct and cannot be used in a generic.
@@ -290,27 +276,6 @@ namespace ValueBuffer
 
                 if (s == null)
                 {
-#if NET6_0_OR_GREATER
-                    // If arg is ISpanFormattable and the beginning doesn't need padding,
-                    // try formatting it into the remaining current chunk.
-                    if (arg is ISpanFormattable spanFormattableArg &&
-                        (leftJustify || width == 0) &&
-                        spanFormattableArg.TryFormat(_chars.Slice(_pos), out int charsWritten, itemFormatSpan, provider))
-                    {
-                        _pos += charsWritten;
-
-                        // Pad the end, if needed.
-                        int padding = width - charsWritten;
-                        if (leftJustify && padding > 0)
-                        {
-                            Append(' ', padding);
-                        }
-
-                        // Continue to parse other characters.
-                        continue;
-                    }
-#endif
-
                     // Otherwise, fallback to trying IFormattable or calling ToString.
                     if (arg is IFormattable formattableArg)
                     {

@@ -16,7 +16,7 @@ namespace ValueBuffer
     /// See like https://source.dot.net/#System.Text.RegularExpressions/ValueListBuilder.cs,8d0a83e8be16c39f
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public partial struct ValueList<T> : IDisposable
+    public partial struct ValueList<T> : IDisposable,IEnumerable<T>
     {
         private static readonly ArrayPool<T> pool = ArrayPool<T>.Shared;
         private static readonly ArrayPool<T[]> poolTs = ArrayPool<T[]>.Shared;
@@ -301,7 +301,7 @@ namespace ValueBuffer
         {
             if (bufferSlots == null)
             {
-                bufferSlots = poolTs.Rent(4);
+                bufferSlots = poolTs.Rent(32768);
             }
             Debug.Assert(bufferSlots != null);
             if ((uint)bufferSlots.Length <= (uint)bufferSlotIndex)
@@ -355,6 +355,46 @@ namespace ValueBuffer
             this = default;
         }
 
+        IEnumerator<T> IEnumerable<T>.GetEnumerator()
+        {
+            return new Enumerator(this);
+        }
+        struct Enumerator: IEnumerator<T>
+        {
+            private readonly ValueList<T> list;
+            private int index;
+
+            public Enumerator(in ValueList<T> list)
+            {
+                this.list = list;
+                index = -1;
+            }
+
+            public T Current => list[index];
+
+            object IEnumerator.Current => Current;
+
+            public void Dispose()
+            {
+                
+            }
+
+            public bool MoveNext()
+            {
+                index++;
+                return list.size > index;
+            }
+
+            public void Reset()
+            {
+                index = -1;
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return ((IEnumerable<T>)this).GetEnumerator();
+        }
     }
 
 }

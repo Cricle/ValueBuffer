@@ -6,6 +6,7 @@ namespace ValueBuffer.Benchmarks.Actions
 {
     [MemoryDiagnoser]
     [MemoryRandomization]
+    [AllStatisticsColumn]
     public class AddObject
     {
         [Params(45, 1234, 876542)]
@@ -20,10 +21,18 @@ namespace ValueBuffer.Benchmarks.Actions
             {
                 list.Add(obj);
             }
-            foreach (var item in list)
+            list.ToArray();
+        }
+        [Benchmark]
+        public void ListCapacity()
+        {
+            var obj = new object();
+            var list = new List<object>(Count);
+            for (int i = 0; i < Count; i++)
             {
-
+                list.Add(obj);
             }
+            list.ToArray();
         }
         [Benchmark]
         public void ValueList()
@@ -35,17 +44,26 @@ namespace ValueBuffer.Benchmarks.Actions
                 {
                     list.Add(obj);
                 }
-                var enu = list.GetEnumerator();
-                while (enu.MoveNext())
+                list.ToArray();
+            }
+        }
+        [Benchmark]
+        public void ValueListCapacity()
+        {
+            var obj = new object();
+            using (var list = new ValueList<object>(Count))
+            {
+                for (int i = 0; i < Count; i++)
                 {
-                    _ = enu.Current;
+                    list.Add(obj);
                 }
-                list.Dispose();
+                list.ToArray();
             }
         }
     }
     [MemoryDiagnoser]
     [MemoryRandomization]
+    [AllStatisticsColumn]
     public class StringBuilderObject
     {
         [Params(45, 1234, 876542)]
