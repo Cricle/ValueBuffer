@@ -371,20 +371,39 @@ namespace ValueBuffer
 
         IEnumerator<T> IEnumerable<T>.GetEnumerator()
         {
-            return new Enumerator(this);
+            return new Enumerator(bufferSlots, size);
         }
         struct Enumerator: IEnumerator<T>
         {
-            private readonly ValueList<T> list;
+            private readonly T[][] bufferSlots;
+            private int slotIndex;
             private int index;
+            private T[] slot;
+            private readonly int size;
+            private int current;
+            private readonly bool alwayFalse;
+            private T value;
 
-            public Enumerator(in ValueList<T> list)
+            public Enumerator(in T[][] bufferSlots,int size)
             {
-                this.list = list;
+                this.bufferSlots = bufferSlots;
                 index = -1;
+                slotIndex = 0;
+                this.size = size;
+                current = 0;
+                if (size == 0)
+                {
+                    slot = null;
+                }
+                else
+                {
+                    slot = bufferSlots[0];
+                }
+                alwayFalse = size == 0 || slot == null || bufferSlots.Length == 0;
+                value = default;
             }
 
-            public T Current => list[index];
+            public T Current => bufferSlots[slotIndex][index];
 
             object IEnumerator.Current => Current;
 
@@ -395,13 +414,26 @@ namespace ValueBuffer
 
             public bool MoveNext()
             {
+                if (current >= size || alwayFalse)
+                {
+                    return false;
+                }
                 index++;
-                return list.size > index;
+                if ((uint)index >= (uint)slot.Length)
+                {
+                    slotIndex++;
+                    slot = bufferSlots[slotIndex];
+                    index = 0;
+                }
+                current++;
+                return current <= size;
             }
 
             public void Reset()
             {
+                slot = null;
                 index = -1;
+                slotIndex = 0;
             }
         }
 

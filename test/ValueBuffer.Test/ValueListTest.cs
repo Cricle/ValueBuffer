@@ -384,7 +384,7 @@ namespace ValueBuffer.Test
                 {
                     lst.Add(i);
                 }
-                var slot = ((IEnumerable<int>)lst).GetEnumerator();
+                var slot = lst.GetEnumerator();
                 var j = 0;
                 while (slot.MoveNext())
                 {
@@ -426,6 +426,45 @@ namespace ValueBuffer.Test
                 {
                     Assert.AreEqual(i, back[i], i.ToString());
                 }
+            }
+        }
+        [TestMethod]
+        public void Enumerable_Empty()
+        {
+            using (var vl=new ValueList<int>())
+            {
+                var enu = ((IEnumerable<int>)vl).GetEnumerator();
+                Assert.IsFalse(enu.MoveNext());
+            }
+        }
+        [TestMethod]
+        public void Enumerable_Values()
+        {
+            using (var vl = new ValueList<int>())
+            {
+                vl.Add(1);
+                var enu = ((IEnumerable<int>)vl).GetEnumerator();
+                Assert.IsTrue(enu.MoveNext());
+                Assert.AreEqual(1, enu.Current);
+                Assert.IsFalse(enu.MoveNext());
+            }
+        }
+        [TestMethod]
+        public void Enumerable_Values_Cross_Blocks()
+        {
+            using (var vl = new ValueList<int>(1))
+            {
+                for (int i = 0; i < 789787; i++)
+                {
+                    vl.Add(i);
+                }
+                var enu = ((IEnumerable<int>)vl).GetEnumerator();
+                for (int i = 0; i < 789787; i++)
+                {
+                    Assert.IsTrue(enu.MoveNext(),i.ToString());
+                    Assert.AreEqual(i, enu.Current, i.ToString());
+                }
+                Assert.IsFalse(enu.MoveNext());
             }
         }
         [TestMethod]
