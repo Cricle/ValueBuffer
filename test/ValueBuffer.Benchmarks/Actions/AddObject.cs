@@ -1,5 +1,7 @@
 ﻿using BenchmarkDotNet.Attributes;
+using Collections.Pooled;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace ValueBuffer.Benchmarks.Actions
@@ -21,7 +23,6 @@ namespace ValueBuffer.Benchmarks.Actions
             {
                 list.Add(obj);
             }
-            list.ToArray();
         }
         [Benchmark]
         public void ListCapacity()
@@ -32,7 +33,6 @@ namespace ValueBuffer.Benchmarks.Actions
             {
                 list.Add(obj);
             }
-            list.ToArray();
         }
         [Benchmark]
         public void ValueList()
@@ -44,7 +44,6 @@ namespace ValueBuffer.Benchmarks.Actions
                 {
                     list.Add(obj);
                 }
-                list.ToArray();
             }
         }
         [Benchmark]
@@ -57,7 +56,30 @@ namespace ValueBuffer.Benchmarks.Actions
                 {
                     list.Add(obj);
                 }
-                list.ToArray();
+            }
+        }
+        [Benchmark]
+        public void PoolList()
+        {
+            var obj = new object();
+            using (var list = new PooledList<object>())
+            {
+                for (int i = 0; i < Count; i++)
+                {
+                    list.Add(obj);
+                }
+            }
+        }
+        [Benchmark]
+        public void PoolListCapacity()
+        {
+            var obj = new object();
+            using (var list = new PooledList<object>(Count))
+            {
+                for (int i = 0; i < Count; i++)
+                {
+                    list.Add(obj);
+                }
             }
         }
     }

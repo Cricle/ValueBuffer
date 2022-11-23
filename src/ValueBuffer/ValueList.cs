@@ -141,6 +141,20 @@ namespace ValueBuffer
             bufferSlotIndex--;
             return preCount;
         }
+
+        public Span<T> GetSlot(int index)
+        {
+            if (bufferSlots==null)
+            {
+                return Span<T>.Empty;
+            }
+            if (index >= bufferSlotIndex)
+            {
+                throw new ArgumentOutOfRangeException($"index out of {bufferSlots.Length - 1}");
+            }
+            return index == bufferSlotIndex - 1 ? bufferSlots[index].AsSpan(0, localUsed) : bufferSlots[index];
+        }
+
         public void RemoveLast(int length)
         {
             var olen = length;

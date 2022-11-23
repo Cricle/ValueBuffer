@@ -2,11 +2,12 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net461;net472;net6.0</TargetFrameworks>
+    <TargetFrameworks>net461;net472;net7.0</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="BenchmarkDotNet" Version="0.13.1" />
+    <PackageReference Include="Collections.Pooled" Version="2.0.0-preview.27" />
     <PackageReference Include="ZString" Version="2.4.3" />
   </ItemGroup>
 

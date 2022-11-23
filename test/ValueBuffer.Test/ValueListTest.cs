@@ -428,5 +428,58 @@ namespace ValueBuffer.Test
                 }
             }
         }
+        [TestMethod]
+        public void SlotEnumerable()
+        {
+            using (var lst = new ValueList<int>(1))
+            {
+                var count = 500000;
+                for (int i = 0; i < count; i++)
+                {
+                    lst.Add(i);
+                }
+                var enu = lst.GetSlotEnumerator();
+                var j = 0;
+                while (enu.MoveNext())
+                {
+                    for (int q = 0; q < enu.Current.Length; q++)
+                    {
+                        Assert.IsTrue(j < count);
+                        Assert.AreEqual(j++, enu.Current[q]);
+                    }
+                }
+            }
+        }
+        [TestMethod]
+        public void GetSlotEmpty()
+        {
+            using (var lst = new ValueList<int>())
+            {
+                var s = lst.GetSlot(0);
+                Assert.AreEqual(0, s.Length);
+            }
+        }
+        [TestMethod]
+        public void GetSlot()
+        {
+            using (var lst = new ValueList<int>(1))
+            {
+                var count = 500000;
+                for (int i = 0; i < count; i++)
+                {
+                    lst.Add(i);
+                }
+                var j = 0;
+                for (int i = 0; i < lst.BufferSlotIndex; i++)
+                {
+                    var s = lst.GetSlot(i);
+                    for (int q = 0; q < s.Length; q++)
+                    {
+                        Assert.IsTrue(j < count);
+                        Assert.AreEqual(j++, s[q]);
+                    }
+                }
+            }
+        }
     }
 }
