@@ -23,7 +23,7 @@ namespace ValueBuffer
         private static readonly ArrayPool<T[]> defaultPoolTs = ArrayPool<T[]>.Shared;
 
         private bool? isValueType;
-        private int baseCapacity;
+        private readonly int baseCapacity;
         internal T[][] bufferSlots;
         private T[] localBuffer;
         private int bufferSlotIndex;
@@ -164,6 +164,19 @@ namespace ValueBuffer
             localCount = localUsed;
             bufferSlotIndex--;
             return preCount;
+        }
+
+        public T[] DangerousGetArray(int index)
+        {
+            if (bufferSlots == null)
+            {
+                return null;
+            }
+            if (index >= bufferSlotIndex)
+            {
+                throw new ArgumentOutOfRangeException($"index out of {bufferSlots.Length - 1}");
+            }
+           return bufferSlots[index];
         }
 
         public Span<T> GetSlot(int index)
@@ -310,7 +323,7 @@ namespace ValueBuffer
             ToArray(arr, 0, size);
             return arr;
         }
-        public void Write(in Span<T> buffer,int offset, int count)
+        public void Write(in ReadOnlySpan<T> buffer,int offset, int count)
         {
             var point = 0;
             var offsetSlot = SkipSlot(ref offset);

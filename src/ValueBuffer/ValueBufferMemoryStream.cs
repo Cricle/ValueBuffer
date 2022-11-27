@@ -3,6 +3,8 @@ using System.Buffers;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace ValueBuffer
 {
@@ -36,6 +38,8 @@ namespace ValueBuffer
 
         public override long Length => buffer.Size;
 
+        public bool IsEOF => position >= buffer.Size;
+
         public override long Position 
         {
             get => position;
@@ -48,7 +52,46 @@ namespace ValueBuffer
         public override void Flush()
         {
         }
-
+#if NET5_0_OR_GREATER
+        public override int Read(Span<byte> buffer)
+        {
+            var count = Math.Min(buffer.Length, this.buffer.Size - position);
+            if (count <= 0)
+            {
+                return 0;
+            }
+            this.buffer.ToArray(buffer, (int)position, (int)count);
+            position+= count;
+            return (int)count;
+        }
+        public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default)
+        {
+            return ValueTask.FromResult(Read(buffer.Span));
+        }
+        public override void Write(ReadOnlySpan<byte> buffer)
+        {
+            this.buffer.Write(buffer, (int)position, buffer.Length);
+            position += buffer.Length;
+        }
+        public override ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken = default)
+        {
+            this.buffer.Write(buffer.Span, (int)position, buffer.Length);
+            position += buffer.Length;
+            return default;
+        }
+#endif
+        public override void WriteByte(byte value)
+        {
+            if (IsEOF)
+            {
+                this.buffer.Add(value);
+            }
+            else
+            {
+                buffer.GetSlot(buffer.BufferSlotIndex - 1)[buffer.LocalUsed - 1] = value;
+            }
+            position++;
+        }
         public override int Read(byte[] buffer, int offset, int count)
         {
             var c = Math.Min(this.buffer.Size - offset - (int)position, count);
@@ -133,6 +176,32 @@ namespace ValueBuffer
                 ArrayPool<char>.Shared.Return(charts);
             }
         }
+        public
+#if !NETSTANDARD2_0
+            override 
+#endif
+            void CopyTo(Stream destination, int bufferSize)
+        {
+            for (int i = 0; i < buffer.BufferSlotIndex; i++)
+            {
+                var arr = buffer.DangerousGetArray(i);
+                if (i != buffer.BufferSlotIndex - 1)
+                {
+                    destination.Write(arr, 0, arr.Length);
+                }
+                else
+                {
+                    destination.Write(arr, 0, buffer.LocalUsed);
+                }
+            }
+        }
+        public override Task CopyToAsync(Stream destination, int bufferSize, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            CopyTo(destination, bufferSize);
+            return Task.CompletedTask;
+        }
+
         public ValueStringBuilder ToStringBuilder()
         {
             return ToStringBuilder(Encoding.UTF8);
