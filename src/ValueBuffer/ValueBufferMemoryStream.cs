@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Buffers;
 using System.IO;
-using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using System.Text;
 
 namespace ValueBuffer
 {
@@ -58,6 +60,22 @@ namespace ValueBuffer
             this.buffer.ToArray(buffer,offset,c);
             return c;
         }
+        public int WriteString(string s)
+        {
+            return WriteString(s, Encoding.UTF8, 0);
+        }
+        public int WriteString(string s, Encoding encoding)
+        {
+            return WriteString(s, encoding, 0);
+        }
+        public int WriteString(string s,Encoding encoding,int startIndex)
+        {
+            using (var bs = EncodingHelper.SharedEncoding(s, encoding, startIndex))
+            {
+                buffer.Write(bs.Buffers, 0, bs.Count);
+                return bs.Count;
+            }
+        }
 
         public override long Seek(long offset, SeekOrigin origin)
         {
@@ -94,10 +112,50 @@ namespace ValueBuffer
         {
             return buffer.ToArray();
         }
-        
+        public override string ToString()
+        {
+            return ToString(Encoding.UTF8);
+        }
+        public string ToString(Encoding encoding)
+        {
+            var bytes = ArrayPool<byte>.Shared.Rent(buffer.Size);
+            buffer.ToArray(bytes);
+            var charCount = encoding.GetCharCount(bytes, 0, buffer.Size);
+            var charts = ArrayPool<char>.Shared.Rent(charCount);
+            try
+            {
+                encoding.GetChars(bytes, 0, buffer.Size, charts, 0);
+                return new string(charts, 0, charCount);
+            }
+            finally
+            {
+                ArrayPool<byte>.Shared.Return(bytes);
+                ArrayPool<char>.Shared.Return(charts);
+            }
+        }
         public ValueStringBuilder ToStringBuilder()
-        {            
-            return new ValueStringBuilder(Unsafe.As<ValueList<byte>, ValueList<char>>(ref buffer));
+        {
+            return ToStringBuilder(Encoding.UTF8);
+        }
+        public ValueStringBuilder ToStringBuilder(Encoding encoding)
+        {
+            var bytes = ArrayPool<byte>.Shared.Rent(buffer.Size);
+            buffer.ToArray(bytes);
+            var charCount = encoding.GetCharCount(bytes, 0, buffer.Size);
+            var charts = ArrayPool<char>.Shared.Rent(charCount);
+            try
+            {
+                var bs = new ValueList<char>(charCount);
+                encoding.GetChars(bytes, 0, buffer.Size, charts, 0);
+                bs.Add(charts,0,charCount);
+                return new ValueStringBuilder(bs);
+            }
+            finally
+            {
+                ArrayPool<byte>.Shared.Return(bytes); 
+                ArrayPool<char>.Shared.Return(charts);
+            }
+
         }
 
         protected override void Dispose(bool disposing)

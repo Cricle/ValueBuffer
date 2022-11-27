@@ -329,7 +329,7 @@ namespace ValueBuffer
                     return;
                 }
             }
-            Add(buffer.Slice(point, buffer.Length - point));
+            Add(buffer.Slice(point, count));
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T[] ToArray()

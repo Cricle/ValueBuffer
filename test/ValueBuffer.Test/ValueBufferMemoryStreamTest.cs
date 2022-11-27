@@ -35,17 +35,40 @@ namespace ValueBuffer.Test
                 Assert.AreEqual(count * buffer.Length, mem.Buffer.Size);
             }
         }
-        //[TestMethod]
-        //public void ToCharts()
-        //{
-        //    using (var mem = new ValueBufferMemoryStream())
-        //    {
-        //        var buffer = Encoding.UTF8.GetBytes("hello worlds");
-        //        mem.Write(buffer,0, buffer.Length);
-        //        var sb = mem.ToStringBuilder();
-        //        var str=sb.ToString();
-        //        Assert.AreEqual("hello worlds", str);
-        //    }
-        //}
+        [TestMethod]
+        public void ToCharts()
+        {
+            using (var mem = new ValueBufferMemoryStream())
+            {
+                var buffer = Encoding.UTF8.GetBytes("hello worlds");
+                mem.Write(buffer, 0, buffer.Length);
+                var sb = mem.ToStringBuilder();
+                var str = sb.ToString();
+                Assert.AreEqual("hello worlds", str);
+                sb.Dispose();
+            }
+        }
+        [TestMethod]
+        public void Strings()
+        {
+            using (var mem = new ValueBufferMemoryStream())
+            {
+                mem.WriteString("hello!!!啊啊啊", Encoding.UTF8, 0);
+                var sb = mem.ToStringBuilder();
+                var str = sb.ToString();
+                Assert.AreEqual("hello!!!啊啊啊", str);
+                sb.Dispose();
+            }
+        }
+        [TestMethod]
+        public void ToStrings()
+        {
+            using (var mem = new ValueBufferMemoryStream())
+            {
+                mem.WriteString("hello!!!啊啊啊", Encoding.UTF8, 0);
+                var str = mem.ToString();
+                Assert.AreEqual("hello!!!啊啊啊", str);
+            }
+        }
     }
 }
