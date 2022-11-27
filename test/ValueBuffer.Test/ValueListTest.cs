@@ -125,7 +125,7 @@ namespace ValueBuffer.Test
                 list.Add(new Index { A = i });
             }
             var lst = new Index[10];
-            Assert.ThrowsException<ArgumentException>(() => list.ToArray(lst));
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() => list.ToArray(lst));
             list.Dispose();
         }
         [TestMethod]
@@ -517,6 +517,120 @@ namespace ValueBuffer.Test
                         Assert.IsTrue(j < count);
                         Assert.AreEqual(j++, s[q]);
                     }
+                }
+            }
+        }
+        [TestMethod]
+        public void ToArrayOffset()
+        {
+            using (var lst = new ValueList<int>())
+            {
+                for (int i = 0; i < 100000; i++)
+                {
+                    lst.Add(i);
+                }
+                var arr = new int[10];
+                lst.ToArray(arr, 90000, arr.Length);
+                for (int i = 0; i < arr.Length; i++)
+                {
+                    Assert.AreEqual(i + 90000, arr[i],i.ToString());
+                }
+            }
+        }
+        [TestMethod]
+        public void ToArrayCount()
+        {
+            using (var lst = new ValueList<int>(1))
+            {
+                for (int i = 0; i < 100000; i++)
+                {
+                    lst.Add(i);
+                }
+                var arr = new int[10];
+                lst.ToArray(arr, 0, arr.Length);
+                for (int i = 0; i < arr.Length; i++)
+                {
+                    Assert.AreEqual(i, arr[i], i.ToString());
+                }
+            }
+        }
+        [TestMethod]
+        public void ToArrayOffsetCount()
+        {
+            using (var lst = new ValueList<int>(1))
+            {
+                for (int i = 0; i < 100000; i++)
+                {
+                    lst.Add(i);
+                }
+                var arr = new int[10];
+                lst.ToArray(arr, 90000, arr.Length);
+                for (int i = 0; i < arr.Length; i++)
+                {
+                    Assert.AreEqual(i+ 90000, arr[i], i.ToString());
+                }
+            }
+        }
+        [TestMethod]
+        public void WriteExists()
+        {
+            using (var lst = new ValueList<int>())
+            {
+                for (int i = 0; i < 40*2; i++)
+                {
+                    lst.Add(1);
+                }
+                var bs = new int[20];
+                for (int i = 0; i < bs.Length; i++)
+                {
+                    bs[i] = i;
+                }
+                lst.Write(bs, 20, bs.Length);
+                for (int i = 0; i < 20; i++)
+                {
+                    Assert.AreEqual(1, lst[i]);
+                }
+                for (int i = 0; i < bs.Length; i++)
+                {
+                    Assert.AreEqual(i, lst[i+20]);
+                }
+            }
+        }
+        [TestMethod]
+        public void WriteOut()
+        {
+            using (var lst = new ValueList<int>())
+            {
+                for (int i = 0; i < 1; i++)
+                {
+                    lst.Add(99);
+                }
+                var bs = new int[20];
+                for (int i = 0; i < bs.Length; i++)
+                {
+                    bs[i] = i;
+                }
+                lst.Write(bs, 0, bs.Length);
+                for (int i = 0; i < 20; i++)
+                {
+                    Assert.AreEqual(i, lst[i]);
+                }
+            }
+        }
+        [TestMethod]
+        public void SetSize()
+        {
+            using (var lst = new ValueList<int>())
+            {
+                for (int i = 0; i < 100; i++)
+                {
+                    lst.Add(i);
+                }
+                lst.SetSize(50);
+                Assert.AreEqual(50, lst.Size);
+                for (int i = 0; i < 50; i++)
+                {
+                    Assert.AreEqual(i, lst[i],i.ToString());
                 }
             }
         }

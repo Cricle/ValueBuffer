@@ -1,15 +1,17 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30114.105
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33110.190
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ValueBuffer", "src\ValueBuffer\ValueBuffer.csproj", "{3724DA9D-3EB2-4BAE-8B41-0E1CC87BE4CC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ValueBuffer", "src\ValueBuffer\ValueBuffer.csproj", "{3724DA9D-3EB2-4BAE-8B41-0E1CC87BE4CC}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{71ACE8AF-5804-46B4-B6FB-735197EFD53F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ValueBuffer.Test", "test\ValueBuffer.Test\ValueBuffer.Test.csproj", "{2297EF2A-E6D2-4490-BB41-548CF3D8A414}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ValueBuffer.Test", "test\ValueBuffer.Test\ValueBuffer.Test.csproj", "{2297EF2A-E6D2-4490-BB41-548CF3D8A414}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ValueBuffer.Benchmarks", "test\ValueBuffer.Benchmarks\ValueBuffer.Benchmarks.csproj", "{8327ABCE-5E21-4301-947F-13D8C0B8BAF7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ValueBuffer.Benchmarks", "test\ValueBuffer.Benchmarks\ValueBuffer.Benchmarks.csproj", "{8327ABCE-5E21-4301-947F-13D8C0B8BAF7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ValueBuffer.Cmd", "ValueBuffer.Cmd\ValueBuffer.Cmd.csproj", "{5BDD2A08-8BAA-46C2-BC1C-0B66B5D3D852}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -57,6 +59,18 @@ Global
 		{8327ABCE-5E21-4301-947F-13D8C0B8BAF7}.Release|x64.Build.0 = Release|Any CPU
 		{8327ABCE-5E21-4301-947F-13D8C0B8BAF7}.Release|x86.ActiveCfg = Release|Any CPU
 		{8327ABCE-5E21-4301-947F-13D8C0B8BAF7}.Release|x86.Build.0 = Release|Any CPU
+		{5BDD2A08-8BAA-46C2-BC1C-0B66B5D3D852}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5BDD2A08-8BAA-46C2-BC1C-0B66B5D3D852}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5BDD2A08-8BAA-46C2-BC1C-0B66B5D3D852}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{5BDD2A08-8BAA-46C2-BC1C-0B66B5D3D852}.Debug|x64.Build.0 = Debug|Any CPU
+		{5BDD2A08-8BAA-46C2-BC1C-0B66B5D3D852}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{5BDD2A08-8BAA-46C2-BC1C-0B66B5D3D852}.Debug|x86.Build.0 = Debug|Any CPU
+		{5BDD2A08-8BAA-46C2-BC1C-0B66B5D3D852}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5BDD2A08-8BAA-46C2-BC1C-0B66B5D3D852}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5BDD2A08-8BAA-46C2-BC1C-0B66B5D3D852}.Release|x64.ActiveCfg = Release|Any CPU
+		{5BDD2A08-8BAA-46C2-BC1C-0B66B5D3D852}.Release|x64.Build.0 = Release|Any CPU
+		{5BDD2A08-8BAA-46C2-BC1C-0B66B5D3D852}.Release|x86.ActiveCfg = Release|Any CPU
+		{5BDD2A08-8BAA-46C2-BC1C-0B66B5D3D852}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

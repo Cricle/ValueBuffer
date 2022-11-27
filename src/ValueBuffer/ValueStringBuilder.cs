@@ -328,6 +328,10 @@ namespace ValueBuffer
         {
             _chars = new ValueList<char>(initialCapacity);
         }
+        public ValueStringBuilder(in ValueList<char> chars)
+        {
+            _chars = chars;
+        }
 
         public int Length
         {

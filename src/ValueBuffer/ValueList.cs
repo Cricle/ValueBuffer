@@ -6,6 +6,7 @@ using System.Buffers;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -18,11 +19,11 @@ namespace ValueBuffer
     /// <typeparam name="T"></typeparam>
     public partial struct ValueList<T> : IDisposable,IEnumerable<T>
     {
-        private static readonly ArrayPool<T> pool = ArrayPool<T>.Shared;
-        private static readonly ArrayPool<T[]> poolTs = ArrayPool<T[]>.Shared;
+        private static readonly ArrayPool<T> defaultPool = ArrayPool<T>.Shared;
+        private static readonly ArrayPool<T[]> defaultPoolTs = ArrayPool<T[]>.Shared;
 
         private bool? isValueType;
-        private readonly int baseCapacity;
+        private int baseCapacity;
         internal T[][] bufferSlots;
         private T[] localBuffer;
         private int bufferSlotIndex;
@@ -31,6 +32,11 @@ namespace ValueBuffer
 
         private int localUsed;
         private int localCount;
+        private ArrayPool<T> pool;
+        private ArrayPool<T[]> poolArray;
+
+        public ArrayPool<T> Pool => pool;
+        public ArrayPool<T[]> PoolArray => poolArray;
 
         public int Size 
         {
@@ -46,7 +52,24 @@ namespace ValueBuffer
         public int LocalCount => localCount;
 
         public int BufferSlotIndex => bufferSlotIndex;
-
+        public ValueList(int capacity,ArrayPool<T> pool,ArrayPool<T[]> poolTs)
+        {
+            if (capacity < 0)
+            {
+                throw new ArgumentException("Capacity must more than zero!");
+            }
+            baseCapacity = capacity;
+            bufferSlots = null;
+            localBuffer = null;
+            bufferSlotIndex = 0;
+            size = 0;
+            totalCapacity = 0;
+            localUsed = 0;
+            localCount = 0;
+            isValueType = null;
+            this.pool = pool;
+            this.poolArray = poolTs;
+        }
         public ValueList(int capacity)
         {
             if (capacity < 0)
@@ -61,9 +84,10 @@ namespace ValueBuffer
             totalCapacity = 0;
             localUsed = 0;
             localCount = 0;
-            isValueType =null;
+            isValueType = null;
+            pool = defaultPool;
+            poolArray = defaultPoolTs;
         }
-
 
         public T this[int index]
         {
@@ -276,58 +300,121 @@ namespace ValueBuffer
             size += items.Length;
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public T[] ToArray()
+        public T[] ToArray(int offset, int count)
         {
 #if NET5_0_OR_GREATER
             var arr = GC.AllocateUninitializedArray<T>(size);
 #else
             var arr = new T[size];
 #endif
-            ToArray(arr);
+            ToArray(arr, 0, size);
             return arr;
+        }
+        public void Write(in Span<T> buffer,int offset, int count)
+        {
+            var point = 0;
+            var offsetSlot = SkipSlot(ref offset);
+            for (; offsetSlot < bufferSlotIndex; offsetSlot++)
+            {
+                var current = bufferSlots[offsetSlot];
+                var currentLength = offsetSlot == bufferSlotIndex - 1 ? localUsed : current.Length;
+                var target = current.AsSpan(offset,currentLength - offset);
+                var copySize = Math.Min(target.Length, count);
+                buffer.Slice(point, copySize).CopyTo(target);
+                offset = 0;
+                count -= copySize;
+                point += copySize;
+                if (count == 0)
+                {
+                    return;
+                }
+            }
+            Add(buffer.Slice(point, buffer.Length - point));
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public T[] ToArray()
+        {
+            return ToArray(0, size);
         }
         public void ToArray(T[] buffer)
         {
-            if (buffer is null)
+            if (buffer==null)
             {
                 throw new ArgumentNullException(nameof(buffer));
             }
-
-            if (buffer.Length < size)
+            ToArray(buffer, 0, size);
+        }
+        public int SkipSlot(ref int offset)
+        {
+            var offsetSlot = 0;
+            for (; offsetSlot < bufferSlotIndex; offsetSlot++)
             {
-                throw new ArgumentException();
+                var current = bufferSlots[offsetSlot];
+                var currentLength = offsetSlot == bufferSlotIndex - 1 ? localUsed : current.Length;
+                if (currentLength > offset)
+                {
+                    break;
+                }
+                offset -= current.Length;
+            }
+            return offsetSlot;
+        }
+        public void ToArray(in Span<T> buffer,int offset,int count)
+        {
+            if (buffer.IsEmpty)
+            {
+                return;
+            }
+
+            if (offset+count > size)
+            {
+                throw new ArgumentOutOfRangeException(nameof(buffer));
             }
             var point = 0;
-            for (int i = 0; i < bufferSlotIndex - 1; i++)
+            var offsetSlot = SkipSlot(ref offset);
+            for (; offsetSlot < bufferSlotIndex; offsetSlot++)
             {
-                var current = bufferSlots[i];
-                Array.Copy(current, 0, buffer, point, current.Length);
-                point += current.Length;
-            }
-            if (bufferSlotIndex != 0)
-            {
-                Array.Copy(localBuffer, 0, buffer, point, localUsed);
+                var current = bufferSlots[offsetSlot];
+                var currentLength = offsetSlot == bufferSlotIndex - 1 ? localUsed : current.Length;
+                var copySize=Math.Min(currentLength, count);
+                current.AsSpan(offset, copySize).CopyTo(buffer.Slice(point,copySize));
+                offset -= copySize;
+                offset = Math.Max(0, offset);
+                count -= copySize;
+                point += copySize;
+                if (count==0)
+                {
+                    return;
+                }
             }
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         private void Grow(int min)
         {
+            if (pool==null)
+            {
+                pool = defaultPool;
+            }
+            if (poolArray==null)
+            {
+                poolArray = defaultPoolTs;
+            }
             if (bufferSlots == null)
             {
-                bufferSlots = poolTs.Rent(32768);
+                bufferSlots = poolArray.Rent(32768);
             }
             Debug.Assert(bufferSlots != null);
             if ((uint)bufferSlots.Length <= (uint)bufferSlotIndex)
             {
                 var newBufferSize = bufferSlots.Length * 2;
-                var newBuffers = poolTs.Rent(newBufferSize);
+                var newBuffers = poolArray.Rent(newBufferSize);
 
                 var old = bufferSlots;
 
                 bufferSlots = newBuffers;
                 Buffer.BlockCopy(old, 0, newBuffers, 0, old.Length);
-                poolTs.Return(old);
+                poolArray.Return(old);
             }
             Debug.Assert(bufferSlots.Length > bufferSlotIndex);
             uint allocSize;
@@ -344,7 +431,14 @@ namespace ValueBuffer
             {
                 allocSize = Math.Max((uint)(size * 2), (uint)min);
             }
-
+#if NET6_0_OR_GREATER
+            if (allocSize > Array.MaxLength)
+#else
+            if(allocSize> 0x7FFFFFC7)
+#endif
+            {
+                allocSize = 0x7FFFFFC7;
+            }
             var localBuffer = pool.Rent((int)allocSize);
 
             var len = localBuffer.Length;
@@ -360,7 +454,7 @@ namespace ValueBuffer
         {
             if (bufferSlots != null)
             {
-                poolTs.Return(bufferSlots);
+                poolArray.Return(bufferSlots);
             }
             for (int i = 0; i < bufferSlotIndex; i++)
             {
@@ -368,7 +462,29 @@ namespace ValueBuffer
             }
             this = default;
         }
-
+        public void Clear()
+        {
+            Dispose();
+        }
+        public void SetSize(int size)
+        {
+            if (size > this.size)
+            {
+                throw new ArgumentOutOfRangeException(nameof(size),"must <= Size");
+            }
+            if (size == this.size)
+            {
+                return;
+            }
+            if (size == 0)
+            {
+                Clear();
+            }
+            else
+            {
+                RemoveLast(this.size - size);
+            }
+        }
         IEnumerator<T> IEnumerable<T>.GetEnumerator()
         {
             return new Enumerator(bufferSlots, size);
@@ -382,7 +498,6 @@ namespace ValueBuffer
             private readonly int size;
             private int current;
             private readonly bool alwayFalse;
-            private T value;
 
             public Enumerator(in T[][] bufferSlots,int size)
             {
@@ -400,7 +515,6 @@ namespace ValueBuffer
                     slot = bufferSlots[0];
                 }
                 alwayFalse = size == 0 || slot == null || bufferSlots.Length == 0;
-                value = default;
             }
 
             public T Current => bufferSlots[slotIndex][index];
