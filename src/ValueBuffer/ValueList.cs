@@ -288,7 +288,7 @@ namespace ValueBuffer
             Add(new ReadOnlySpan<T>(items, 0, items.Length));
         }
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public void Add(in ReadOnlySpan<T> items)
+        public void Add(ReadOnlySpan<T> items)
         {
             int itemUsed = 0;
             if (totalCapacity <= size + items.Length)
@@ -323,7 +323,7 @@ namespace ValueBuffer
             ToArray(arr, 0, size);
             return arr;
         }
-        public void Write(in ReadOnlySpan<T> buffer,int offset, int count)
+        public void Write(ReadOnlySpan<T> buffer,int offset, int count)
         {
             var point = 0;
             var offsetSlot = SkipSlot(ref offset);
@@ -372,7 +372,7 @@ namespace ValueBuffer
             }
             return offsetSlot;
         }
-        public void ToArray(in Span<T> buffer,int offset,int count)
+        public void ToArray(Span<T> buffer,int offset,int count)
         {
             if (buffer.IsEmpty)
             {
@@ -512,7 +512,7 @@ namespace ValueBuffer
             private int current;
             private readonly bool alwayFalse;
 
-            public Enumerator(in T[][] bufferSlots,int size)
+            public Enumerator(T[][] bufferSlots,int size)
             {
                 this.bufferSlots = bufferSlots;
                 index = -1;
