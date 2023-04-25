@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Buffers;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -157,24 +156,11 @@ namespace ValueBuffer
         }
         public override string ToString()
         {
-            return ToString(Encoding.UTF8);
+            return buffer.AsString();
         }
         public string ToString(Encoding encoding)
         {
-            var bytes = ArrayPool<byte>.Shared.Rent(buffer.Size);
-            buffer.ToArray(bytes);
-            var charCount = encoding.GetCharCount(bytes, 0, buffer.Size);
-            var charts = ArrayPool<char>.Shared.Rent(charCount);
-            try
-            {
-                encoding.GetChars(bytes, 0, buffer.Size, charts, 0);
-                return new string(charts, 0, charCount);
-            }
-            finally
-            {
-                ArrayPool<byte>.Shared.Return(bytes);
-                ArrayPool<char>.Shared.Return(charts);
-            }
+            return buffer.AsString(encoding);
         }
         public
 #if !NETSTANDARD2_0

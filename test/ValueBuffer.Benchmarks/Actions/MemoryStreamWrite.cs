@@ -56,6 +56,8 @@ namespace ValueBuffer.Benchmarks.Actions
                     {
                         mem.Write(value, 0, value.Length);
                     }
+                    mem.Position = 0;
+                    mem.CopyTo(Stream.Null);
                 }
             }
         }
@@ -70,6 +72,8 @@ namespace ValueBuffer.Benchmarks.Actions
                     {
                         mem.Write(value, 0, value.Length);
                     }
+                    mem.Position = 0;
+                    mem.CopyTo(Stream.Null);
                 }
             }
         }
@@ -84,6 +88,8 @@ namespace ValueBuffer.Benchmarks.Actions
                     {
                         mem.Write(value, 0, value.Length);
                     }
+                    mem.Position = 0;
+                    mem.CopyTo(Stream.Null);
                 }
             }
         }

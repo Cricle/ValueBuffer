@@ -165,7 +165,21 @@ namespace ValueBuffer
             bufferSlotIndex--;
             return preCount;
         }
-
+        public IEnumerable<Memory<T>> DangerousEnumerableArray()
+        {
+            for (int i = 0; i < bufferSlotIndex; i++)
+            {
+                var arr = DangerousGetArray(i);
+                if (i != bufferSlotIndex - 1)
+                {
+                    yield return arr.AsMemory();
+                }
+                else
+                {
+                    yield return arr.AsMemory(0,localUsed);
+                }
+            }
+        }
         public T[] DangerousGetArray(int index)
         {
             if (bufferSlots == null)
