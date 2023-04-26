@@ -12,13 +12,15 @@ namespace ValueBuffer
         private int length;
         public const int DefaultSize = 32768;
 
+        protected T[] CurrentBuffer => currentBuffer;
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected void Resize(int sizeHint)
         {
             var nar = pool.Rent(sizeHint);
             if (currentBuffer != null)
             {
-                Array.Copy(currentBuffer, 0, nar, 0, currentBuffer.Length < nar.Length ? currentBuffer.Length : nar.Length);
+                Buffer.BlockCopy(currentBuffer, 0, nar, 0, currentBuffer.Length < nar.Length ? currentBuffer.Length : nar.Length);
                 pool.Return(currentBuffer);
             }
             currentBuffer = nar;

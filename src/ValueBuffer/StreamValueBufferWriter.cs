@@ -32,7 +32,11 @@ namespace ValueBuffer
         public override void Advance(int count)
         {
             base.Advance(count);
+#if NETSTANDARD2_0
+            Stream.Write(CurrentBuffer,0, count);
+#else
             Stream.Write(GetSpan());
+#endif
             Reset();
         }
     }
