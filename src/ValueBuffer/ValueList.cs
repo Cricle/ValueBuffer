@@ -305,7 +305,7 @@ namespace ValueBuffer
         public void Add(ReadOnlySpan<T> items)
         {
             int itemUsed = 0;
-            if (totalCapacity <= size + items.Length)
+            if ((uint)totalCapacity <= (uint)size + (uint)items.Length)
             {
                 if (totalCapacity != 0)
                 {

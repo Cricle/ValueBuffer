@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Buffers;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -143,7 +144,18 @@ namespace ValueBuffer
             buffer.SetSize((int)value);
             position = Math.Min(position, buffer.Size);
         }
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Add(ReadOnlySpan<byte> bytes)
+        {
+            this.buffer.Add(bytes);
+            position += bytes.Length;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Add(byte[] buffer, int offset, int count)
+        {
+            this.buffer.Add(buffer.AsSpan(offset, count));
+            position += count;
+        }
         public override void Write(byte[] buffer, int offset, int count)
         {
             this.buffer.Write(buffer.AsSpan(offset, count), (int)position, count);
@@ -162,11 +174,7 @@ namespace ValueBuffer
         {
             return buffer.AsString(encoding);
         }
-        public
-#if !NETSTANDARD2_0
-            override 
-#endif
-            void CopyTo(Stream destination, int bufferSize)
+        public new void CopyTo(Stream destination)
         {
             for (int i = 0; i < buffer.BufferSlotIndex; i++)
             {
@@ -180,6 +188,26 @@ namespace ValueBuffer
                     destination.Write(arr, 0, buffer.LocalUsed);
                 }
             }
+        }
+        public
+#if !NETSTANDARD2_0
+            override 
+#else 
+            new
+#endif
+            void CopyTo(Stream destination, int bufferSize)
+        {
+            CopyTo(destination);
+        }
+        public new Task CopyToAsync(Stream destination)
+        {
+            CopyTo(destination);
+            return Task.CompletedTask;
+        }
+        public new Task CopyToAsync(Stream destination, int bufferSize)
+        {
+            CopyTo(destination);
+            return Task.CompletedTask;
         }
         public override Task CopyToAsync(Stream destination, int bufferSize, CancellationToken cancellationToken)
         {

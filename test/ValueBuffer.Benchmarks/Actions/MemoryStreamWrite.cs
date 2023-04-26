@@ -16,7 +16,7 @@ namespace ValueBuffer.Benchmarks.Actions
     {
         private static readonly RecyclableMemoryStreamManager mgr = new RecyclableMemoryStreamManager();
 
-        [Params(10,72205)]
+        [Params(10, 72205)]
         public int Size { get; set; }
 
         [Params(20, 53)]
@@ -28,7 +28,7 @@ namespace ValueBuffer.Benchmarks.Actions
         public void Setup()
         {
             value = new byte[Size];
-            value.AsSpan().Fill(1);
+            value.AsSpan().Fill(byte.MaxValue);
         }
 
         [Benchmark(Baseline =true)]
@@ -42,6 +42,8 @@ namespace ValueBuffer.Benchmarks.Actions
                     {
                         mem.Write(value, 0, value.Length);
                     }
+                    mem.Position = 0;
+                    mem.CopyTo(Stream.Null);
                 }
             }
         }
@@ -70,7 +72,7 @@ namespace ValueBuffer.Benchmarks.Actions
                 {
                     for (int j = 0; j < Count; j++)
                     {
-                        mem.Write(value, 0, value.Length);
+                        mem.Add(value);
                     }
                     mem.Position = 0;
                     mem.CopyTo(Stream.Null);
