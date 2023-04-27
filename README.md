@@ -1,20 +1,19 @@
-<h1>
+<h1 align="center">
     <center>ValueBuffer</center>
 </h1>
-<div style="text-align:center;">
+<div style="text-align:center;" align="center">
   The very fast, low memory, powerfull buffer for Stream, List, BufferWriter
 </div>
-<div style="text-align:center;">
+<br/>
+<div align="center">
 
 [![.NET](https://github.com/Cricle/ValueBuffer/actions/workflows/dotnet.yml/badge.svg)](https://github.com/Cricle/ValueBuffer/actions/workflows/dotnet.yml)
-
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Cricle_ValueBuffer&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=Cricle_ValueBuffer)
-
 [![codecov](https://codecov.io/gh/Cricle/ValueBuffer/branch/master/graph/badge.svg?token=85FsB1JWtx)](https://codecov.io/gh/Cricle/ValueBuffer)
 
 </div>
 
-## Fast
+## Useage
 
 ### Using ValueList like List
 
