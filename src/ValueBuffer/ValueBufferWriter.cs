@@ -10,7 +10,6 @@ namespace ValueBuffer
         private T[] currentBuffer;
         private int position;
         private int length;
-        public const int DefaultSize = 32768;
 
         protected T[] CurrentBuffer => currentBuffer;
 
@@ -33,7 +32,7 @@ namespace ValueBuffer
         {
 
         }
-        public ValueBufferWriter(ArrayPool<T> pool) : this(pool, DefaultSize)
+        public ValueBufferWriter(ArrayPool<T> pool) : this(pool, MagicConst.DefaultSize)
         {
         }
         public ValueBufferWriter(ArrayPool<T> pool, int preallocateSize)
@@ -77,14 +76,7 @@ namespace ValueBuffer
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Memory<T> GetMemory(int sizeHint = 0)
         {
-            if (sizeHint < 0)
-            {
-                throw new ArgumentOutOfRangeException("sizeHint", "size must be greater than 0");
-            }
-            if (sizeHint == 0)
-            {
-                sizeHint = DefaultSize;
-            }
+            MagicConst.BufferCheck(ref sizeHint);
             if (position + sizeHint > currentBuffer.Length)
             {
                 Resize(position + sizeHint);
@@ -94,19 +86,7 @@ namespace ValueBuffer
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Span<T> GetSpan(int sizeHint = 0)
         {
-            if (sizeHint < 0)
-            {
-                throw new ArgumentOutOfRangeException("sizeHint", "size must be greater than 0");
-            }
-            if (sizeHint == 0)
-            {
-                sizeHint = DefaultSize;
-            }
-            if (position + sizeHint > currentBuffer.Length)
-            {
-                Resize(position + sizeHint);
-            }
-            return currentBuffer.AsSpan(position, sizeHint);
+            return GetMemory(sizeHint).Span;
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ReadOnlySpan<T> GetSpan()

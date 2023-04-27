@@ -13,6 +13,10 @@ namespace ValueBuffer
         }
         public static string AsString(this in ValueList<byte> buffer,Encoding encoding)
         {
+            if (buffer.Size==0)
+            {
+                return string.Empty;
+            }
             var bytes = ArrayPool<byte>.Shared.Rent(buffer.Size);
             buffer.ToArray(bytes);
             var charCount = encoding.GetCharCount(bytes, 0, buffer.Size);

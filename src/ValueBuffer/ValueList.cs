@@ -7,9 +7,11 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 
 namespace ValueBuffer
 {
@@ -180,6 +182,44 @@ namespace ValueBuffer
                 }
             }
         }
+        public void WriteToStream(Stream stream)
+        {
+            if (typeof(T)!=typeof(byte))
+            {
+                throw new InvalidCastException($"Unable to case {typeof(T)} to byte");
+            }
+            for (int i = 0; i < bufferSlotIndex; i++)
+            {
+                var arr = DangerousGetArray(i);
+                if (bufferSlotIndex - 1 == i)
+                {
+                    stream.Write(Unsafe.As<T[], byte[]>(ref arr), 0, localUsed);
+                }
+                else
+                {
+                    stream.Write(Unsafe.As<T[], byte[]>(ref arr),0,arr.Length);
+                }
+            }
+        }
+        public async Task WriteToStreamAsync(Stream stream)
+        {
+            if (typeof(T) != typeof(byte))
+            {
+                throw new InvalidCastException($"Unable to case {typeof(T)} to byte");
+            }
+            for (int i = 0; i < bufferSlotIndex; i++)
+            {
+                var arr = DangerousGetArray(i);
+                if (bufferSlotIndex - 1 == i)
+                {
+                    await stream.WriteAsync(Unsafe.As<T[], byte[]>(ref arr), 0, localUsed);
+                }
+                else
+                {
+                    await stream.WriteAsync(Unsafe.As<T[], byte[]>(ref arr), 0, arr.Length);
+                }
+            }
+        }
         public T[] DangerousGetArray(int index)
         {
             if (bufferSlots == null)
@@ -307,7 +347,7 @@ namespace ValueBuffer
             int itemUsed = 0;
             if ((uint)totalCapacity <= (uint)size + (uint)items.Length)
             {
-                if (totalCapacity != 0)
+                if ((uint)totalCapacity != 0U)
                 {
                     var avaliable = totalCapacity - size;
                     items.Slice(0, avaliable)
@@ -339,6 +379,18 @@ namespace ValueBuffer
         }
         public void Write(ReadOnlySpan<T> buffer,int offset, int count)
         {
+            if (offset == size)
+            {
+                if (buffer.Length == count)
+                {
+                    Add(buffer);
+                }
+                else
+                {
+                    Add(buffer.Slice(0, count));
+                }
+                return;
+            }
             var point = 0;
             var offsetSlot = SkipSlot(ref offset);
             for (; offsetSlot < bufferSlotIndex; offsetSlot++)
@@ -369,7 +421,15 @@ namespace ValueBuffer
             {
                 throw new ArgumentNullException(nameof(buffer));
             }
-            ToArray(buffer, 0, size);
+            if (size>buffer.Length)
+            {
+                throw new ArgumentOutOfRangeException($"The size must more or equals than {size}, but only {buffer.Length}");
+            }
+            var offset = 0;
+            foreach (var item in DangerousEnumerableArray())
+            {
+                item.Span.CopyTo(buffer.AsSpan(offset));
+            }
         }
         public int SkipSlot(ref int offset)
         {
@@ -415,7 +475,38 @@ namespace ValueBuffer
                 }
             }
         }
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void DangerousAdvance(int count)
+        {
+            if (localCount < count + localUsed)
+            {
+                throw new InvalidOperationException($"The count {count} must less or equals than {localCount - localUsed}");
+            }
+            localUsed += count;
+            size += count;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool DangerousCanGetMemory(ref int sizeHit)
+        {
+            if (sizeHit == 0)
+            {
+                sizeHit = 256;
+            }
+            if (pool == null)
+            {
+                Grow(sizeHit);
+            }
+            return localCount - localUsed >= sizeHit;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Memory<T> DangerousGetMemory(int sizeHit = 0)
+        {
+            if (DangerousCanGetMemory(ref sizeHit))
+            {
+                return localBuffer.AsMemory(localUsed, sizeHit);
+            }
+            throw new InvalidOperationException($"Avaliable size is {localCount - localUsed}, but required is {sizeHit}");
+        }
         [MethodImpl(MethodImplOptions.NoInlining)]
         private void Grow(int min)
         {
@@ -429,7 +520,7 @@ namespace ValueBuffer
             }
             if (bufferSlots == null)
             {
-                bufferSlots = poolArray.Rent(32768);
+                bufferSlots = poolArray.Rent(MagicConst.DefaultSize);
             }
             Debug.Assert(bufferSlots != null);
             if ((uint)bufferSlots.Length <= (uint)bufferSlotIndex)
@@ -448,7 +539,7 @@ namespace ValueBuffer
 
             if (size == 0)
             {
-                allocSize = Math.Max(32768U, (uint)min);
+                allocSize = Math.Max(MagicConst.DefaultSize, (uint)min);
                 if (bufferSlotIndex == 0)
                 {
                     allocSize = Math.Max((uint)baseCapacity, allocSize);
@@ -467,7 +558,6 @@ namespace ValueBuffer
                 allocSize = 0x7FFFFFC7;
             }
             var localBuffer = pool.Rent((int)allocSize);
-
             var len = localBuffer.Length;
 
             totalCapacity += len;

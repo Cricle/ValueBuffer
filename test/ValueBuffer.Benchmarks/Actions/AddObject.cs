@@ -1,7 +1,6 @@
 ﻿using BenchmarkDotNet.Attributes;
 using Collections.Pooled;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
 namespace ValueBuffer.Benchmarks.Actions
@@ -11,7 +10,7 @@ namespace ValueBuffer.Benchmarks.Actions
     [AllStatisticsColumn]
     public class AddObject
     {
-        [Params(45, 1234, 876542)]
+        [Params(1234, 876542)]
         public int Count { get; set; }
 
         [Benchmark(Baseline = true)]
@@ -23,6 +22,7 @@ namespace ValueBuffer.Benchmarks.Actions
             {
                 list.Add(obj);
             }
+            list.ToArray();
         }
         [Benchmark]
         public void ListCapacity()
@@ -33,6 +33,7 @@ namespace ValueBuffer.Benchmarks.Actions
             {
                 list.Add(obj);
             }
+            list.ToArray();
         }
         [Benchmark]
         public void ValueList()
@@ -44,6 +45,7 @@ namespace ValueBuffer.Benchmarks.Actions
                 {
                     list.Add(obj);
                 }
+                list.ToArray();
             }
         }
         [Benchmark]
@@ -56,6 +58,7 @@ namespace ValueBuffer.Benchmarks.Actions
                 {
                     list.Add(obj);
                 }
+                list.ToArray();
             }
         }
         [Benchmark]
@@ -68,6 +71,7 @@ namespace ValueBuffer.Benchmarks.Actions
                 {
                     list.Add(obj);
                 }
+                list.ToArray();
             }
         }
         [Benchmark]
@@ -80,6 +84,7 @@ namespace ValueBuffer.Benchmarks.Actions
                 {
                     list.Add(obj);
                 }
+                list.ToArray();
             }
         }
     }

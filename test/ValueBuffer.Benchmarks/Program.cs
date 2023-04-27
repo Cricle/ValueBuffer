@@ -1,4 +1,5 @@
 ﻿using System;
+using ValueBuffer.Benchmarks.Actions;
 
 namespace ValueBuffer.Benchmarks
 {
@@ -6,7 +7,8 @@ namespace ValueBuffer.Benchmarks
     {
         static void Main(string[] args)
         {
-            BenchmarkDotNet.Running.BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
+            new MemoryJsonWriter { Count = 10, Size = 1_000_000 }.ValueListBuffer();
+            //BenchmarkDotNet.Running.BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
         }
     }
 }

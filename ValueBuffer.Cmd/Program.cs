@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 using System.Text.Json;
 
 namespace ValueBuffer.Cmd
@@ -10,26 +11,24 @@ namespace ValueBuffer.Cmd
         {
             for (int q = 0; q < 5; q++)
             {
-                var m = GC.GetTotalMemory(true);
+                var m = GC.GetTotalMemory(false);
                 var sw = Stopwatch.GetTimestamp();
-                using (var mem = new ValueBufferMemoryStream())
+                using (var w = new ValueListBufferWriter<byte>())
+                using (var writer = new Utf8JsonWriter(w, new JsonWriterOptions { SkipValidation = true }))
                 {
-                    using (var w = new StreamValueBufferWriter(mem))
-                    using (var writer = new Utf8JsonWriter(w))
+                    writer.WriteStartObject();
+                    for (int d = 0; d < 10; d++)
                     {
-                        writer.WriteStartObject();
-                        for (int d = 0; d < 10; d++)
+                        writer.WriteStartArray(d.ToString());
+                        for (int i = 0; i < 1_000_000; i++)
                         {
-                            writer.WriteStartArray(d.ToString());
-                            for (int i = 0; i < 1_000_000; i++)
-                            {
-                                writer.WriteNumberValue(i);
-                            }
-                            writer.WriteEndArray();
+                            writer.WriteNumberValue(i);
                         }
-                        writer.WriteEndObject();
+                        writer.WriteEndArray();
                     }
-                    var buffer = mem.Buffer;
+                    writer.WriteEndObject();
+                    writer.Flush();
+                    var buffer = w.List;
                     for (int i = 0; i < buffer.BufferSlotIndex; i++)
                     {
                         _ = buffer.DangerousGetArray(i);
