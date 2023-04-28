@@ -9,7 +9,7 @@
 
 [![.NET](https://github.com/Cricle/ValueBuffer/actions/workflows/dotnet.yml/badge.svg)](https://github.com/Cricle/ValueBuffer/actions/workflows/dotnet.yml)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Cricle_ValueBuffer&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=Cricle_ValueBuffer)
-[![codecov](https://codecov.io/gh/Cricle/ValueBuffer/branch/master/graph/badge.svg?token=85FsB1JWtx)](https://codecov.io/gh/Cricle/ValueBuffer)
+[![codecov](https://codecov.io/gh/Cricle/ValueBuffer/branch/main/graph/badge.svg?token=85FsB1JWtx)](https://codecov.io/gh/Cricle/ValueBuffer)
 
 </div>
 
