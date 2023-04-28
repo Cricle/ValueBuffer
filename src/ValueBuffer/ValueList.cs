@@ -1,7 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-
-using System;
+﻿using System;
 using System.Buffers;
 using System.Collections;
 using System.Collections.Generic;
@@ -478,7 +475,7 @@ namespace ValueBuffer
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void DangerousAdvance(int count)
         {
-            if (localCount < count + localUsed)
+            if ((uint)localCount < (uint)count + (uint)localUsed)
             {
                 throw new InvalidOperationException($"The count {count} must less or equals than {localCount - localUsed}");
             }
@@ -496,14 +493,19 @@ namespace ValueBuffer
             {
                 Grow(sizeHit);
             }
-            return localCount - localUsed >= sizeHit;
+            return (uint)localCount - (uint)localUsed >= (uint)sizeHit;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Memory<T> VeryDangerousGetMemory(int sizeHit = 0)
+        {
+            return new Memory<T>(localBuffer,localUsed,sizeHit);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Memory<T> DangerousGetMemory(int sizeHit = 0)
         {
             if (DangerousCanGetMemory(ref sizeHit))
             {
-                return localBuffer.AsMemory(localUsed, sizeHit);
+                return new Memory<T>(localBuffer, localUsed, sizeHit);
             }
             throw new InvalidOperationException($"Avaliable size is {localCount - localUsed}, but required is {sizeHit}");
         }
@@ -537,6 +539,7 @@ namespace ValueBuffer
             Debug.Assert(bufferSlots.Length > bufferSlotIndex);
             uint allocSize;
 
+            min = (int)BitOperations.RoundUpToPowerOf2((uint)min);
             if (size == 0)
             {
                 allocSize = Math.Max(MagicConst.DefaultSize, (uint)min);

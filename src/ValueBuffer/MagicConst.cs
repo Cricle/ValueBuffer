@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 
 namespace ValueBuffer
 {
@@ -6,6 +7,7 @@ namespace ValueBuffer
     {
         public const int DefaultSize = 32768;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void BufferCheck(ref int sizeHint)
         {
             if (sizeHint < 0)

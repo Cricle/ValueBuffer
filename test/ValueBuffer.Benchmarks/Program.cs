@@ -7,8 +7,11 @@ namespace ValueBuffer.Benchmarks
     {
         static void Main(string[] args)
         {
-            new MemoryJsonWriter { Count = 10, Size = 1_000_000 }.ValueListBuffer();
-            //BenchmarkDotNet.Running.BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
+            //for (int i = 0; i < 2; i++)
+            //{
+            //    new MemoryJsonWriter { Count = 100, Size = 1_000_000 }.ValueListBuffer();
+            //}
+            BenchmarkDotNet.Running.BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
         }
     }
 }

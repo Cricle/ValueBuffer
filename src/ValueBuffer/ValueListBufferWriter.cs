@@ -56,6 +56,7 @@ namespace ValueBuffer
             list.Dispose();
         }
         private bool isFromList;
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Memory<T> GetMemory(int sizeHint = 0)
         {
@@ -64,13 +65,13 @@ namespace ValueBuffer
             if (list.DangerousCanGetMemory(ref sizeHint))
             {
                 isFromList = true;
-                return list.DangerousGetMemory(sizeHint);
+                return list.VeryDangerousGetMemory(sizeHint);
             }
-            if (currentBuffer == null || sizeHint > currentBuffer.Length)
+            if (currentBuffer == null || (uint)sizeHint > (uint)currentBuffer.Length)
             {
                 Resize(sizeHint);
             }
-            return currentBuffer.AsMemory(0, sizeHint);
+            return new Memory<T>(currentBuffer, 0, sizeHint);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Span<T> GetSpan(int sizeHint = 0)
@@ -80,7 +81,7 @@ namespace ValueBuffer
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Resize(int sizeHint)
         {
-            var nar = pool.Rent(Math.Max(sizeHint, MagicConst.DefaultSize));
+            var nar = pool.Rent((int)Math.Max(BitOperations.RoundUpToPowerOf2((uint)sizeHint), MagicConst.DefaultSize));
             if (currentBuffer != null)
             {
                 pool.Return(currentBuffer);

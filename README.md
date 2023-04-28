@@ -55,6 +55,15 @@ using (var w = new ValueListBufferWriter<byte>())
 }
 ```
 
+## Using EncodingHelper for shared encoding
+
+```csharp
+using (var buffer=EncodingHelper.SharedEncoding("hello"))
+{
+    Console.WriteLine(Encoding.UTF8.GetString(buffer.Span));//hello
+}
+```
+
 ## Benchmarks
 
 [Benchmark](./test/Benchmarks.md)

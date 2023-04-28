@@ -8,6 +8,12 @@ namespace ValueBuffer
     public static class EncodingHelper
     {
         private readonly static ArrayPool<byte> pool = ArrayPool<byte>.Shared;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static EncodingResult SharedEncoding(string str)
+        {
+            return SharedEncoding(str, Encoding.UTF8, 0);
+        }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static EncodingResult SharedEncoding(string str, Encoding encoding)
         {

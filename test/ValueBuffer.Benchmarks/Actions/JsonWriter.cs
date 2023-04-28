@@ -1,6 +1,7 @@
 ﻿using BenchmarkDotNet.Attributes;
 using BetterStreams;
 using System.IO;
+using System.IO.Pipelines;
 using System.Text.Json;
 
 namespace ValueBuffer.Benchmarks.Actions
@@ -51,6 +52,17 @@ namespace ValueBuffer.Benchmarks.Actions
                     WriterJson(writer);
                 }
                 w.List.WriteToStream(Stream.Null);
+            }
+        }
+        [Benchmark]
+        public void MemoryStreamWithPip()
+        {
+            using (var w = new MemoryStream())
+            {
+                using (var writer = new Utf8JsonWriter(PipeWriter.Create(w), new JsonWriterOptions { SkipValidation = true }))
+                {
+                    WriterJson(writer);
+                }
             }
         }
     }

@@ -9,6 +9,10 @@ namespace ValueBuffer
 
         public readonly int Count;
 
+        public Span<byte> Span => Buffers.AsSpan(0, Count);
+
+        public Memory<byte> Memory => Buffers.AsMemory(0, Count);
+
         internal EncodingResult(byte[] buffers, int count)
         {
             Buffers = buffers;
