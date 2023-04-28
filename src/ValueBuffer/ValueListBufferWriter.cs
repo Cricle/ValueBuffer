@@ -11,7 +11,7 @@ namespace ValueBuffer
 
         private ValueList<T> list;
 
-        public ValueList<T> List => list;
+        public ref ValueList<T> List => ref list;
 
         public ValueListBufferWriter(int? capacity = null)
             : this(ArrayPool<T>.Shared, capacity)

@@ -14,7 +14,7 @@ namespace ValueBuffer
 
         private ValueList<byte> buffer;
 
-        public ValueList<byte> Buffer => buffer;
+        public ref ValueList<byte> Buffer =>ref  buffer;
 
         public ValueBufferMemoryStream(in ValueList<byte> buffer)
         {
