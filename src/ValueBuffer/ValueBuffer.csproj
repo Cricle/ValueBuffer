@@ -8,12 +8,12 @@
 		<RepositoryUrl>https://github.com/Cricle/ValueBuffer</RepositoryUrl>
 		<Version>1.3.0</Version>
 		<Description>
-			Supoort very fast low memory list, stream, encoding, stringbuilder, buffer
-			ValueList
-			ValueStringBuilder
-			ValueBufferMemoryStream
-			StreamValueBufferWriter
-			EncodingHelper
+Supoort very fast low memory list, stream, encoding, stringbuilder, buffer
+ValueList
+ValueStringBuilder
+ValueBufferMemoryStream
+DateTimeToStringHelper
+EncodingHelper
 		</Description>
 	</PropertyGroup>
 

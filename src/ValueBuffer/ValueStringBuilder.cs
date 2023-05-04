@@ -13,7 +13,7 @@ namespace ValueBuffer
     /// <summary>
     /// https://source.dot.net/#System.Text.RegularExpressions/ValueStringBuilder.cs,157e1a7ce4de87da
     /// </summary>
-    public partial struct ValueStringBuilder
+    public partial struct ValueStringBuilder : IDisposable
     {
         public void AppendFormat(string format, object arg0) => AppendFormatHelper(null, format, new ParamsArray(arg0));
 
