@@ -231,7 +231,7 @@ namespace ValueBuffer
                 var bs = new ValueList<char>(charCount);
                 encoding.GetChars(bytes, 0, buffer.Size, charts, 0);
                 bs.Add(charts,0,charCount);
-                return new ValueStringBuilder(bs);
+                return new ValueStringBuilder(in bs);
             }
             finally
             {

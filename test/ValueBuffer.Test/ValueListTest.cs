@@ -72,13 +72,13 @@ namespace ValueBuffer.Test
                 list.Add(i);
             }
             Assert.AreEqual(count, list.Size);
-            var enu = list.GetEnumerator();
+            var enu = ValueList<int>.GetEnumerator(list);
             var x = 0;
             while (enu.MoveNext())
             {
                 Assert.AreEqual(x++, enu.Current);
             }
-            var enuSlot = list.GetSlotEnumerator();
+            var enuSlot = ValueList<int>.GetSlotEnumerator(list);
             x = 0;
             while (enuSlot.MoveNext())
             {
@@ -158,7 +158,7 @@ namespace ValueBuffer.Test
                 list.Add(new Index { A=i});
             }
             Assert.AreEqual(count, list.Size);
-            var enu = list.GetEnumerator();
+            var enu = ValueList<Index>.GetEnumerator(list);
             var x = 0;
             while (enu.MoveNext())
             {
@@ -167,7 +167,7 @@ namespace ValueBuffer.Test
                 Assert.AreEqual(a,b);
                 x++;
             }
-            var enuSlot = list.GetSlotEnumerator();
+            var enuSlot = ValueList<Index>.GetSlotEnumerator(list);
             x = 0;
             while (enuSlot.MoveNext())
             {
@@ -347,7 +347,7 @@ namespace ValueBuffer.Test
         }
         private void CheckArray<T>(in ValueList<T> list,T[] arr)
         {
-            var enu = list.GetEnumerator();
+            var enu = ValueList<T>.GetEnumerator(list);
             var x = 0;
             while (enu.MoveNext())
             {
@@ -366,7 +366,7 @@ namespace ValueBuffer.Test
                 {
                     lst.Add(i);
                 }
-                var slot = lst.GetEnumerator();
+                var slot = ValueList<int>.GetEnumerator(lst);
                 var j = 0;
                 while (slot.MoveNext())
                 {
@@ -384,7 +384,7 @@ namespace ValueBuffer.Test
                 {
                     lst.Add(i);
                 }
-                var slot = lst.GetEnumerator();
+                var slot = ValueList<int>.GetEnumerator(lst);
                 var j = 0;
                 while (slot.MoveNext())
                 {
@@ -477,7 +477,7 @@ namespace ValueBuffer.Test
                 {
                     lst.Add(i);
                 }
-                var enu = lst.GetSlotEnumerator();
+                var enu = ValueList<int>.GetSlotEnumerator(lst);
                 var j = 0;
                 while (enu.MoveNext())
                 {

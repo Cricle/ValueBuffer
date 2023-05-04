@@ -527,7 +527,7 @@ namespace ValueBuffer
             Debug.Assert(bufferSlots != null);
             if ((uint)bufferSlots.Length <= (uint)bufferSlotIndex)
             {
-                var newBufferSize = bufferSlots.Length * 2;
+                var newBufferSize = (int)BitOperations.RoundUpToPowerOf2((uint)bufferSlots.Length * 2);
                 var newBuffers = poolArray.Rent(newBufferSize);
 
                 var old = bufferSlots;

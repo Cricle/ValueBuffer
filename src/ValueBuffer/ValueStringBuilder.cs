@@ -13,7 +13,7 @@ namespace ValueBuffer
     /// <summary>
     /// https://source.dot.net/#System.Text.RegularExpressions/ValueStringBuilder.cs,157e1a7ce4de87da
     /// </summary>
-    public ref partial struct ValueStringBuilder
+    public partial struct ValueStringBuilder
     {
         public void AppendFormat(string format, object arg0) => AppendFormatHelper(null, format, new ParamsArray(arg0));
 
@@ -318,7 +318,7 @@ namespace ValueBuffer
             throw new FormatException();
         }
     }
-    public ref partial struct ValueStringBuilder
+    public partial struct ValueStringBuilder
     {
         private static readonly ArrayPool<char> pool = ArrayPool<char>.Shared;
 

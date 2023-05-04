@@ -13,13 +13,13 @@ namespace ValueBuffer
 {
     public partial struct ValueList<T>
     {
-        public ValueEnumerator GetEnumerator()
+        public static ValueEnumerator GetEnumerator(in ValueList<T> lst)
         {
-            return new ValueEnumerator(this);
+            return new ValueEnumerator(lst);
         }
-        public SlotEnumerator GetSlotEnumerator()
+        public static SlotEnumerator GetSlotEnumerator(in ValueList<T> lst)
         {
-            return new SlotEnumerator(this);
+            return new SlotEnumerator(lst);
         }
         public ref struct SlotEnumerator
         {

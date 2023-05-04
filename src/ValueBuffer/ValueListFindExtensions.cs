@@ -8,7 +8,7 @@ namespace ValueBuffer
         public static List<T> ToList<T>(this in ValueList<T> list)
         {
             var lst = new List<T>(list.Size);
-            ToList(list, lst);
+            ToList(in list, lst);
             return lst;
         }
         public static void ToList<T>(this in ValueList<T> list, List<T> lst)
@@ -18,7 +18,7 @@ namespace ValueBuffer
                 throw new ArgumentNullException(nameof(lst));
             }
 
-            var enu = list.GetSlotEnumerator();
+            var enu = ValueList<T>.GetSlotEnumerator(in list);
             while (enu.MoveNext())
             {
                 lst.AddRange(enu.CurrentArray);
@@ -27,7 +27,7 @@ namespace ValueBuffer
         public static bool Contains<T>(this in ValueList<T> list, T item)
             where T : IEquatable<T>
         {
-            var enu = list.GetSlotEnumerator();
+            var enu = ValueList<T>.GetSlotEnumerator(in list);
             while (enu.MoveNext())
             {
                 var pos = enu.Current.IndexOf(item);
@@ -47,7 +47,7 @@ namespace ValueBuffer
             }
 
             var totalPos = 0;
-            var enu = list.GetEnumerator();
+            var enu = ValueList<T>.GetEnumerator(in list);
             while (enu.MoveNext())
             {
                 if (condition(enu.Current))
@@ -62,7 +62,7 @@ namespace ValueBuffer
             where T : IEquatable<T>
         {
             var totalPos = 0;
-            var enu = list.GetSlotEnumerator();
+            var enu = ValueList<T>.GetSlotEnumerator(in list);
             while (enu.MoveNext())
             {
                 var pos = enu.Current.IndexOf(item);
