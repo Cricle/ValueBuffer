@@ -64,7 +64,11 @@ namespace ValueBuffer
                 var year = dt.Year;
                 for (int i = 0; i < 3; i++)
                 {
+#if NETSTANDARD2_0
+                    year = Math.DivRem(year, 10,out var Remainder);
+#else
                     (year, int Remainder) = Math.DivRem(year, 10);
+#endif
                     buffer[3 - i] = (char)('0' + Remainder);
                 }
                 buffer[0] = (char)('0' + year);
