@@ -33,5 +33,18 @@ namespace ValueBuffer.Test
                 Assert.AreEqual(res.ToString(), res1.ToString());
             }
         }
+        [TestMethod]
+        public void EncodingWithEncodingToStringEquals()
+        {
+            var str = "hello world";
+            using (var res = EncodingHelper.SharedEncoding(str,Encoding.ASCII))
+            {
+                var exp = Encoding.ASCII.GetBytes(str);
+                Assert.AreEqual(res.Count, exp.Length);
+                Assert.IsTrue(res.Span.SequenceEqual(exp));
+                Assert.IsTrue(res.Memory.Span.SequenceEqual(exp));
+                Assert.IsTrue(res.Buffers.AsSpan(0, res.Count).SequenceEqual(exp));
+            }
+        }
     }
 }

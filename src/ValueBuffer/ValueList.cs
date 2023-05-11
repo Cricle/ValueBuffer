@@ -449,7 +449,7 @@ namespace ValueBuffer
                 return;
             }
 
-            if (offset+count > size)
+            if (offset+count > size+1)
             {
                 throw new ArgumentOutOfRangeException(nameof(buffer));
             }
@@ -526,13 +526,21 @@ namespace ValueBuffer
             Debug.Assert(bufferSlots != null);
             if ((uint)bufferSlots.Length <= (uint)bufferSlotIndex)
             {
-                var newBufferSize = (int)BitOperations.RoundUpToPowerOf2((uint)bufferSlots.Length * 2);
+                var newBufferSize = Math.Min((int)BitOperations.RoundUpToPowerOf2((uint)bufferSlots.Length * 2),
+#if NETSTANDARD2_0
+                    0x7FFFFFC7,
+#else
+                    Array.MaxLength
+#endif
+                    );
                 var newBuffers = poolArray.Rent(newBufferSize);
 
                 var old = bufferSlots;
 
                 bufferSlots = newBuffers;
+#pragma warning disable CA2018
                 Buffer.BlockCopy(old, 0, newBuffers, 0, old.Length);
+#pragma warning restore CA2018
                 poolArray.Return(old);
             }
             Debug.Assert(bufferSlots.Length > bufferSlotIndex);
@@ -574,10 +582,10 @@ namespace ValueBuffer
             if (bufferSlots != null)
             {
                 poolArray.Return(bufferSlots);
-            }
-            for (int i = 0; i < bufferSlotIndex; i++)
-            {
-                pool.Return(bufferSlots[i]);
+                for (int i = 0; i < bufferSlotIndex; i++)
+                {
+                    pool.Return(bufferSlots[i]);
+                }
             }
             this = default;
         }

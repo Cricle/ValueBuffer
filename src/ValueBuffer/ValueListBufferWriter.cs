@@ -61,7 +61,7 @@ namespace ValueBuffer
         public Memory<T> GetMemory(int sizeHint = 0)
         {
             isFromList = false;
-            MagicConst.BufferCheck(ref sizeHint);
+            MagicConst.BufferCheckMin(ref sizeHint);
             if (list.DangerousCanGetMemory(ref sizeHint))
             {
                 isFromList = true;

@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -707,6 +708,60 @@ namespace ValueBuffer.Test
                 lst.Add(new object());
                 lst.RemoveLast();
                 Assert.AreEqual(lst.Size, 0);
+            }
+        }
+        [TestMethod]
+        public void CreateWithInput()
+        {
+            var pool1 = ArrayPool<int>.Create();
+            var pool2 = ArrayPool<int[]>.Create();
+            using (var lst = new ValueList<int>(100000, pool1, pool2))
+            {
+                lst.Add(1);
+                Assert.IsTrue(lst.TotalCapacity > 100000);
+                Assert.AreEqual(pool1, lst.Pool);
+                Assert.AreEqual(pool2, lst.PoolArray);
+            }
+        }
+        [TestMethod]
+        public void WriteToStreamNotByteType_ThrowException()
+        {
+            using (var lst = new ValueList<int>())
+            {
+                Assert.ThrowsException<InvalidCastException>(() => lst.WriteToStream(Stream.Null));
+            }
+        }
+        [TestMethod]
+        public async Task WriteToStreamAsyncNotByteType_ThrowException()
+        {
+            using (var lst = new ValueList<int>())
+            {
+                await Assert.ThrowsExceptionAsync<InvalidCastException>(() => lst.WriteToStreamAsync(Stream.Null));
+            }
+        }
+        [TestMethod]
+        public void AddAnyRemoveAll()
+        {
+            using (var lst = new ValueList<int>())
+            {
+                var p = 10_000;
+                for (int i = 0; i < p; i++)
+                {
+                    lst.Add(i);
+                }
+                while (lst.Size!=0)
+                {
+                    lst.RemoveLast();
+                    p--;
+                    var enu = ValueList<int>.GetEnumerator(lst);
+                    var w = 0;
+                    Assert.AreEqual(p, lst.Size);
+                    while (enu.MoveNext())
+                    {
+                        Assert.AreEqual(w, enu.Current);
+                        w++;
+                    }
+                }
             }
         }
     }

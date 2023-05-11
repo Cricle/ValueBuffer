@@ -13,7 +13,7 @@ namespace ValueBuffer
         }
         public static string AsString(this in ValueList<byte> buffer,Encoding encoding)
         {
-            if (buffer.Size==0)
+            if (buffer.Size == 0)
             {
                 return string.Empty;
             }

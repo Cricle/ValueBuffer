@@ -388,6 +388,27 @@ namespace ValueBuffer
         {
             _chars.Add(c);
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void AppendDateTime(DateTime time, char mergeDate = '-', char mergeTime = ':')
+        {
+            Span<char> buffer = stackalloc char[19];
+            DateTimeToStringHelper.ToFullString(ref time, ref buffer, mergeDate, mergeTime);
+            _chars.Add(buffer);
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void AppendTime(DateTime time, char mergeTime = ':')
+        {
+            Span<char> buffer = stackalloc char[8];
+            DateTimeToStringHelper.ToTimeString(ref time, ref buffer, mergeTime);
+            _chars.Add(buffer);
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void AppendDate(DateTime time, char mergeDate = '-')
+        {
+            Span<char> buffer = stackalloc char[10];
+            DateTimeToStringHelper.ToDateString(ref time, ref buffer, mergeDate);
+            _chars.Add(buffer);
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Append(string s)

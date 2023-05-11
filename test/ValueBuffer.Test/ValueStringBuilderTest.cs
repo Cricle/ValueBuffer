@@ -146,5 +146,38 @@ namespace ValueBuffer.Test
             }
             Assert.IsNotNull(ex);
         }
+        [TestMethod]
+        public void AppendDateTime()
+        {
+            using (var b = new ValueStringBuilder(1024))
+            {
+                var time = DateTime.Parse("2023-01-01 11:22:33");
+                b.AppendDateTime(time);
+                var exp = time.ToString("yyyy-MM-dd HH:mm:ss");
+                Assert.AreEqual(exp, b.ToString());
+            }
+        }
+        [TestMethod]
+        public void AppendTime()
+        {
+            using (var b = new ValueStringBuilder(1024))
+            {
+                var time = DateTime.Parse("2023-01-01 11:22:33");
+                b.AppendTime(time);
+                var exp = time.ToString("HH:mm:ss");
+                Assert.AreEqual(exp, b.ToString());
+            }
+        }
+        [TestMethod]
+        public void AppendDate()
+        {
+            using (var b = new ValueStringBuilder(1024))
+            {
+                var time = DateTime.Parse("2023-01-01 11:22:33");
+                b.AppendDate(time);
+                var exp = time.ToString("yyyy-MM-dd");
+                Assert.AreEqual(exp, b.ToString());
+            }
+        }
     }
 }

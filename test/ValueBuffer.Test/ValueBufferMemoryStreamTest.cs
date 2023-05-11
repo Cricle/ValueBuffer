@@ -1,6 +1,8 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Buffers;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -14,7 +16,7 @@ namespace ValueBuffer.Test
         [TestMethod]
         public void WriteEmpty()
         {
-            using (var mem=new ValueBufferMemoryStream())
+            using (var mem = new ValueBufferMemoryStream())
             {
                 mem.Write(new byte[0], 0, 0);
                 Assert.AreEqual(0, mem.Position);
@@ -27,7 +29,7 @@ namespace ValueBuffer.Test
             using (var mem = new ValueBufferMemoryStream())
             {
                 var count = 40;
-                var buffer=new byte[40000];
+                var buffer = new byte[40000];
                 for (int i = 0; i < count; i++)
                 {
                     mem.Write(buffer, 0, buffer.Length);
@@ -177,6 +179,120 @@ namespace ValueBuffer.Test
                 Assert.AreEqual(1, mem.Position);
                 Assert.AreEqual(1, mem.Buffer.Size);
                 Assert.AreEqual(2, mem.Buffer[0]);
+            }
+        }
+        [TestMethod]
+        public void CreateWithParamters()
+        {
+            using (var mem = new ValueBufferMemoryStream(1024))
+            {
+                Assert.IsTrue(mem.CanRead);
+                Assert.IsTrue(mem.CanSeek);
+                Assert.IsTrue(mem.CanWrite);
+            }
+            var pool=ArrayPool<byte>.Create();
+            var lst = new ValueList<byte>(1024, pool, ArrayPool<byte[]>.Shared);
+            using (var mem = new ValueBufferMemoryStream(lst))
+            {
+                Assert.AreEqual(pool, mem.Buffer.Pool);
+            }
+        }
+        [TestMethod]
+        public void LengthMustEqualsSize()
+        {
+            using (var mem = new ValueBufferMemoryStream())
+            {
+                mem.Write(new byte[] { 1, 2, 3, 4 }, 0, 4);
+                Assert.AreEqual(4, mem.Length);
+                Assert.IsTrue(mem.IsEOF);
+                mem.Seek(0, SeekOrigin.Begin);
+                Assert.IsFalse(mem.IsEOF);
+                mem.Flush();
+            }
+        }
+        [TestMethod]
+        public void Read()
+        {
+            using (var mem = new ValueBufferMemoryStream())
+            {
+                var datas = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 };
+                mem.Write(datas, 0, datas.Length);
+                var read = new byte[3];
+                mem.Position = 0;
+                var res = mem.Read(read, 0, 3);
+                Assert.AreEqual(3, res);
+                Assert.AreEqual(1, read[0]);
+                Assert.AreEqual(2, read[1]);
+                Assert.AreEqual(3, read[2]);
+
+                read = new byte[3];
+                mem.Position = 3;
+                res = mem.Read(read, 0, 3);
+                Assert.AreEqual(3, res);
+                Assert.AreEqual(4, read[0]);
+                Assert.AreEqual(5, read[1]);
+                Assert.AreEqual(6, read[2]);
+
+                read = new byte[3];
+                mem.Position = 6;
+                var actual = datas.Skip(6).ToArray();
+                res = mem.Read(read, 0, 3);
+                Assert.AreEqual(2, res);
+                Assert.AreEqual(actual[0], read[0]);
+                Assert.AreEqual(actual[1], read[1]);
+
+                mem.Position = 8;
+                res = mem.Read(read, 0, 1);
+                Assert.AreEqual(0, res);
+            }
+        }
+        [TestMethod]
+        public void Seek()
+        {
+            using (var mem = new ValueBufferMemoryStream())
+            {
+                mem.Write(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 }, 0, 7);
+                mem.Position = 0;
+                mem.Seek(2, SeekOrigin.Current);
+                Assert.AreEqual(2, mem.Position);
+
+                mem.Seek(2, SeekOrigin.Current);
+                Assert.AreEqual(4, mem.Position);
+
+                mem.Seek(2, SeekOrigin.Current);
+                Assert.AreEqual(6, mem.Position);
+
+                mem.Seek(2, SeekOrigin.Current);
+                Assert.AreEqual(7, mem.Position);
+
+                mem.Seek(2, SeekOrigin.Current);
+                Assert.AreEqual(7, mem.Position);
+
+
+                mem.Position = 0;
+                mem.Seek(0, SeekOrigin.End);
+                Assert.AreEqual(7, mem.Position);
+            }
+        }
+        [TestMethod]
+        public void SetLength()
+        {
+            using (var mem = new ValueBufferMemoryStream())
+            {
+                mem.Write(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 }, 0, 7);
+                mem.SetLength(1);
+                Assert.AreEqual(1, mem.Buffer.Size);
+            }
+        }
+        [TestMethod]
+        public void WriteString()
+        {
+            using (var mem = new ValueBufferMemoryStream())
+            {
+                mem.WriteString("hello");
+                mem.WriteString("world",Encoding.UTF8);
+                var str=mem.Buffer.AsString();
+                Assert.AreEqual("helloworld", str);
             }
         }
     }

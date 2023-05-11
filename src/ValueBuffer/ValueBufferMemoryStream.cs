@@ -94,13 +94,13 @@ namespace ValueBuffer
         }
         public override int Read(byte[] buffer, int offset, int count)
         {
-            var c = Math.Min(this.buffer.Size - offset - (int)position, count);
+            var c = Math.Min(Math.Max(0, this.buffer.Size - (int)position), count);
             if (c == 0)
             {
                 return 0;
             }
+            this.buffer.ToArray(buffer.AsSpan(offset,count),(int)position,c);
             position += c;
-            this.buffer.ToArray(buffer,offset,c);
             return c;
         }
         public int WriteString(string s)
@@ -128,7 +128,7 @@ namespace ValueBuffer
                     position = 0;
                     break;
                 case SeekOrigin.Current:
-                    position = Math.Min(buffer.Size, offset);
+                    position = Math.Min(buffer.Size, offset+position);
                     break;
                 case SeekOrigin.End:
                     position = buffer.Size;
