@@ -19,7 +19,7 @@ namespace ValueBuffer
             var nar = pool.Rent(sizeHint);
             if (currentBuffer != null)
             {
-                Buffer.BlockCopy(currentBuffer, 0, nar, 0, currentBuffer.Length < nar.Length ? currentBuffer.Length : nar.Length);
+                Array.Copy(currentBuffer, nar, currentBuffer.Length < nar.Length ? currentBuffer.Length : nar.Length);
                 pool.Return(currentBuffer);
             }
             currentBuffer = nar;
@@ -76,7 +76,7 @@ namespace ValueBuffer
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Memory<T> GetMemory(int sizeHint = 0)
         {
-            MagicConst.BufferCheck(ref sizeHint);
+            MagicConst.BufferCheckMin(ref sizeHint);
             if (position + sizeHint > currentBuffer.Length)
             {
                 Resize(position + sizeHint);

@@ -8,6 +8,7 @@ using System.IO;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace ValueBuffer
@@ -198,7 +199,7 @@ namespace ValueBuffer
                 }
             }
         }
-        public async Task WriteToStreamAsync(Stream stream)
+        public async Task WriteToStreamAsync(Stream stream,CancellationToken token=default)
         {
             if (typeof(T) != typeof(byte))
             {
@@ -206,6 +207,7 @@ namespace ValueBuffer
             }
             for (int i = 0; i < bufferSlotIndex; i++)
             {
+                token.ThrowIfCancellationRequested();
                 var arr = DangerousGetArray(i);
                 if (bufferSlotIndex - 1 == i)
                 {
@@ -219,10 +221,6 @@ namespace ValueBuffer
         }
         public T[] DangerousGetArray(int index)
         {
-            if (bufferSlots == null)
-            {
-                return null;
-            }
             if (index >= bufferSlotIndex)
             {
                 throw new ArgumentOutOfRangeException($"index out of {bufferSlots.Length - 1}");
@@ -426,6 +424,7 @@ namespace ValueBuffer
             foreach (var item in DangerousEnumerableArray())
             {
                 item.Span.CopyTo(buffer.AsSpan(offset));
+                offset += item.Length;
             }
         }
         public int SkipSlot(ref int offset)

@@ -322,7 +322,7 @@ namespace ValueBuffer
     {
         private static readonly ArrayPool<char> pool = ArrayPool<char>.Shared;
 
-        private ValueList<char> _chars;
+        public ValueList<char> _chars;
 
         public ValueStringBuilder(int initialCapacity)
         {
@@ -354,18 +354,11 @@ namespace ValueBuffer
         private static void CopyBlock(Span<char> x,ValueList<char> y)
         {
             var pos = 0;
-            var len = y.BufferSlotIndex;
-            for (int i = 0; i < len - 2; i++)
+            foreach (var item in y.DangerousEnumerableArray())
             {
-                var now = y.bufferSlots[i];
-                var nowLen = now.Length;
-                new ReadOnlySpan<char>(now, 0, nowLen)
-                    .CopyTo(x.Slice(pos));
-                pos += nowLen;
+                item.Span.CopyTo(x.Slice(pos));
+                pos += item.Length;
             }
-            var last = y.bufferSlots[len - 1];
-            new ReadOnlySpan<char>(last, 0, y.LocalUsed)
-                .CopyTo(x.Slice(pos));
         }
 #endif
         public override string ToString()

@@ -98,6 +98,35 @@ namespace ValueBuffer.Test
             Assert.AreEqual("123.456789", b.ToString());
             b.Dispose();
         }
+        private string GetRandomString(int size)
+        {
+            var rand = new Random();
+            var str = "0123456789QWERTYUIOPASDFGHJKLZXCVBNM,./;'[]=-)(*&^%#$@!qwertyuiopasdfghjklzxcvbnm<>?:{ }|\\，。、；’【】、《》？：“";
+            return new string(Enumerable.Range(0, size).Select(x => str[rand.Next(0, str.Length)]).ToArray());
+        }
+        [TestMethod]
+        public void AppendFormatLarge()
+        {
+            var rand = new Random();
+            for (int j = 0; j < 10; j++)
+            {
+                var b = new ValueStringBuilder(1);
+                var s = string.Empty;
+                for (int i = 0; i < 1024; i++)
+                {
+                    var str = GetRandomString(rand.Next(1000, 2000));
+                    s += str;
+                    b.Append(str);
+                }
+                var target = b.ToString();
+                Assert.AreEqual(target.Length, s.Length);
+                for (int i = 0; i < target.Length; i++)
+                {
+                    Assert.AreEqual(target[i], s[i], i.ToString());
+                }
+                b.Dispose();
+            }
+        }
         [TestMethod]
         public void GivenNullAppend_MustThrowExceotion()
         {

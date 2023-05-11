@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
@@ -632,6 +633,80 @@ namespace ValueBuffer.Test
                 {
                     Assert.AreEqual(i, lst[i],i.ToString());
                 }
+            }
+        }
+        [TestMethod]
+        public void WriteToStream()
+        {
+            using (var lst = new ValueList<byte>())
+            {
+                var buffer = new byte[1024 * 5];
+                for (int i = 0; i < buffer.Length; i++)
+                {
+                    buffer[i] = (byte)(i % byte.MaxValue);
+                }
+                lst.Add(buffer);
+                var mem = new MemoryStream();
+                lst.WriteToStream(mem);
+                mem.Position = 0;
+                var memBuffer=mem.ToArray();
+                Assert.AreEqual(memBuffer.Length, mem.Length);
+                Assert.IsTrue(memBuffer.SequenceEqual(buffer));
+            }
+        }
+        [TestMethod]
+        public async Task WriteToStreamAsync()
+        {
+            using (var lst = new ValueList<byte>())
+            {
+                var buffer = new byte[1024 * 5];
+                for (int i = 0; i < buffer.Length; i++)
+                {
+                    buffer[i] = (byte)(i % byte.MaxValue);
+                }
+                lst.Add(buffer);
+                var mem = new MemoryStream();
+                await lst.WriteToStreamAsync(mem);
+                mem.Position = 0;
+                var memBuffer = mem.ToArray();
+                Assert.AreEqual(memBuffer.Length, mem.Length);
+                Assert.IsTrue(memBuffer.SequenceEqual(buffer));
+            }
+        }
+        [TestMethod]
+        public void DangerousGetArrayThrowIfIndexOutOfRange()
+        {
+            using (var lst = new ValueList<byte>())
+            {
+                lst.Add(1);
+                Assert.ThrowsException<ArgumentOutOfRangeException>(() => lst.DangerousGetArray(2));
+            }
+        }
+        [TestMethod]
+        public void AddHasAnyCapacity()
+        {
+            using (var lst = new ValueList<int>())
+            {
+                lst.Add(0);
+                lst.Add(Enumerable.Range(1, 999).Select(x => x).ToArray());
+                Assert.AreEqual(lst.Size, 1000);
+                var enu = ValueList<int>.GetEnumerator(lst);
+                var q = 0;
+                while (enu.MoveNext())
+                {
+                    Assert.AreEqual(q, enu.Current);
+                    q++;
+                }
+            }
+        }
+        [TestMethod]
+        public void RemoveIfObject_WillCleanRef()
+        {
+            using (var lst = new ValueList<object>())
+            {
+                lst.Add(new object());
+                lst.RemoveLast();
+                Assert.AreEqual(lst.Size, 0);
             }
         }
     }

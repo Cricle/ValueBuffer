@@ -19,5 +19,18 @@ namespace ValueBuffer
                 sizeHint = DefaultSize;
             }
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void BufferCheckMin(ref int sizeHint)
+        {
+            if (sizeHint < 0)
+            {
+                throw new ArgumentOutOfRangeException("sizeHint", "size must be greater than 0");
+            }
+            if (sizeHint == 0)
+            {
+                sizeHint = 1;
+                sizeHint = (int)BitOperations.RoundUpToPowerOf2((uint)sizeHint);
+            }
+        }
     }
 }
