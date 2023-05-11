@@ -528,7 +528,7 @@ namespace ValueBuffer
             {
                 var newBufferSize = Math.Min((int)BitOperations.RoundUpToPowerOf2((uint)bufferSlots.Length * 2),
 #if NETSTANDARD2_0
-                    0x7FFFFFC7,
+                    0x7FFFFFC7
 #else
                     Array.MaxLength
 #endif
