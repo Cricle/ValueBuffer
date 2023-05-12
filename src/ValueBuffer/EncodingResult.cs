@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Buffers;
+using System.Runtime.CompilerServices;
 
 namespace ValueBuffer
 {
@@ -18,7 +19,7 @@ namespace ValueBuffer
             Buffers = buffers;
             Count = count;
         }
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Dispose()
         {
             ArrayPool<byte>.Shared.Return(Buffers);

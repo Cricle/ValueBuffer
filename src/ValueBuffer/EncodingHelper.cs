@@ -2,6 +2,7 @@
 using System.Buffers;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace ValueBuffer
@@ -20,11 +21,13 @@ namespace ValueBuffer
         {
             return SharedEncoding(str, encoding, 0);
         }
-        public static EncodingResult SharedEncoding(string str, Encoding encoding, int startIndex)
+        public unsafe static EncodingResult SharedEncoding(string str, Encoding encoding, int startIndex)
         {
-            int byteCount = encoding.GetByteCount(str);
-            byte[] bytes = pool.Rent(byteCount);
-            int bytesReceived = encoding.GetBytes(str, startIndex, str.Length, bytes, 0);
+            var strLen = str.Length;
+            var cs = (char*)Unsafe.AsPointer(ref MemoryMarshal.GetReference(str.AsSpan(startIndex)));
+            var byteCount = encoding.GetByteCount(cs, strLen);
+            var bytes = pool.Rent(byteCount);
+            var bytesReceived = encoding.GetBytes(cs, strLen, (byte*)Unsafe.AsPointer(ref bytes[0]), byteCount);
             Debug.Assert(bytesReceived == byteCount);
             return new EncodingResult(bytes, bytesReceived);
         }
