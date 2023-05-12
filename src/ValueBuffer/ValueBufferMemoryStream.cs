@@ -115,7 +115,8 @@ namespace ValueBuffer
         {
             using (var bs = EncodingHelper.SharedEncoding(s, encoding, startIndex))
             {
-                buffer.Write(bs.Buffers, 0, bs.Count);
+                buffer.Write(bs.Span, (int)position, bs.Count);
+                position += bs.Count;
                 return bs.Count;
             }
         }

@@ -12,6 +12,41 @@ namespace ValueBuffer.Benchmarks.Actions
 {
     [MemoryDiagnoser]
     [RankColumn]
+    public class EncodingTest
+    {
+        [Params(128,5456, 72205)]
+        public int Size { get; set; }
+
+        private string text;
+
+        [GlobalSetup] 
+        public void Setup()
+        {
+            var buffer=new char[Size];
+            for (int i = 0; i < buffer.Length; i++)
+            {
+                buffer[i] = (char)('a' + i % 26);
+            }
+            text = new string(buffer);
+        }
+
+        [Benchmark(Baseline = true)]
+        public void Raw()
+        {
+            var a=Encoding.UTF8.GetBytes(text);
+        }
+
+        [Benchmark]
+        public void Shared()
+        {
+            using (var a = EncodingHelper.SharedEncoding(text))
+            {
+
+            }
+        }
+    }
+    [MemoryDiagnoser]
+    [RankColumn]
     public class MemoryStreamWrite
     {
         private static readonly RecyclableMemoryStreamManager mgr = new RecyclableMemoryStreamManager();
