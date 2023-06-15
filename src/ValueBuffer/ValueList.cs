@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -219,6 +220,7 @@ namespace ValueBuffer
                 }
             }
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T[] DangerousGetArray(int index)
         {
             if (index >= bufferSlotIndex)
@@ -410,20 +412,38 @@ namespace ValueBuffer
         {
             return ToArray(0, size);
         }
-        public void ToArray(T[] buffer)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public List<T> ToList()
         {
-            if (buffer==null)
+            if (size==0)
             {
-                throw new ArgumentNullException(nameof(buffer));
+                return new List<T>(0);
             }
-            if (size>buffer.Length)
+            var lst = new List<T>(size);
+            for (int i = 0; i < bufferSlotIndex; i++)
+            {
+                var arr = DangerousGetArray(i);
+                if (i != bufferSlotIndex - 1)
+                {
+                    lst.AddRange(arr);
+                }
+                else
+                {
+                    lst.AddRange(arr.Take(localUsed));
+                }
+            }
+            return lst;
+        }
+        public void ToArray(Span<T> buffer)
+        {
+            if (size > buffer.Length)
             {
                 throw new ArgumentOutOfRangeException($"The size must more or equals than {size}, but only {buffer.Length}");
             }
             var offset = 0;
             foreach (var item in DangerousEnumerableArray())
             {
-                item.Span.CopyTo(buffer.AsSpan(offset));
+                item.Span.CopyTo(buffer.Slice(offset));
                 offset += item.Length;
             }
         }

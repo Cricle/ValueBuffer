@@ -112,13 +112,6 @@ namespace ValueBuffer.Test
             list.Dispose();
         }
         [TestMethod]
-        public void GivenNullToArray_ThrowException()
-        {
-            var list = new ValueList<Index>(1);
-            Assert.ThrowsException<ArgumentNullException>(() => list.ToArray(null));
-            list.Dispose();
-        }
-        [TestMethod]
         public void ToArrayOutOfRange()
         {
             var list = new ValueList<Index>(1);
@@ -761,6 +754,35 @@ namespace ValueBuffer.Test
                         Assert.AreEqual(w, enu.Current);
                         w++;
                     }
+                }
+            }
+        }
+        [TestMethod]
+        public void ToList_Empty()
+        {
+            using (var vl=new ValueList<int>())
+            {
+                var lst = vl.ToList();
+                Assert.AreEqual(0, lst.Count);
+                Assert.AreEqual(0, lst.Capacity);
+            }
+        }
+        [TestMethod]
+        [DataRow(1)]
+        [DataRow(100)]
+        [DataRow(1_000_000)]
+        public void ToList_AddAndToList(int count)
+        {
+            using (var vl = new ValueList<int>())
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    vl.Add(i);
+                }
+                var lst = vl.ToList();
+                for (int i = 0; i < count; i++)
+                {
+                    Assert.AreEqual(i, lst[i], i.ToString());
                 }
             }
         }

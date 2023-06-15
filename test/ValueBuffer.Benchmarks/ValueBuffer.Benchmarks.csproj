@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="BenchmarkDotNet" Version="0.13.1" />
+	  <PackageReference Include="BenchmarkDotNet" Version="0.13.5" />
     <PackageReference Include="Collections.Pooled" Version="2.0.0-preview.27" />
     <PackageReference Include="Microsoft.IO.RecyclableMemoryStream" Version="2.2.1" />
     <PackageReference Include="PooledMemoryStream" Version="1.0.3" />
