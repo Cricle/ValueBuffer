@@ -2,17 +2,17 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net472;net7.0</TargetFrameworks>
+    <TargetFrameworks>net472;net7.0;net8.0</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
-	  <PackageReference Include="BenchmarkDotNet" Version="0.13.5" />
+	  <PackageReference Include="BenchmarkDotNet" Version="0.13.12" />
     <PackageReference Include="Collections.Pooled" Version="2.0.0-preview.27" />
-    <PackageReference Include="Microsoft.IO.RecyclableMemoryStream" Version="2.2.1" />
-    <PackageReference Include="PooledMemoryStream" Version="1.0.3" />
-    <PackageReference Include="System.IO.Pipelines" Version="7.0.0" />
-    <PackageReference Include="ZString" Version="2.4.3" />
-	  <PackageReference Include="System.Text.Json" Version="6.0.6" />
+    <PackageReference Include="Microsoft.IO.RecyclableMemoryStream" Version="3.0.0" />
+    <PackageReference Include="PooledMemoryStream" Version="1.0.5" />
+    <PackageReference Include="System.IO.Pipelines" Version="8.0.0" />
+    <PackageReference Include="ZString" Version="2.6.0" />
+	  <PackageReference Include="System.Text.Json" Version="8.0.3" />
   </ItemGroup>
 
   <ItemGroup>
